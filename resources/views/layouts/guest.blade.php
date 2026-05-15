@@ -14,16 +14,22 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+    <body class="font-sans text-gray-900 antialiased" style="background: linear-gradient(135deg, #0F2027 0%, #203A43 50%, #2C5364 100%);">
+        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
+            <div class="mb-4 px-4">
+                <a href="/" class="flex items-center justify-center">
+                    <div class="flex flex-col items-center">
+                        <span class="text-4xl font-extrabold text-white tracking-wider" style="letter-spacing: 0.05em;">Manajemen Barang</span>
+                    </div>
                 </a>
             </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
+            <div class="w-full sm:max-w-md mt-6 px-6 py-8 bg-white shadow-2xl overflow-hidden sm:rounded-2xl border border-gray-200/50 backdrop-blur-sm">
                 {{ $slot }}
+            </div>
+
+            <div class="mt-8 text-center text-sm text-gray-300">
+                <p>&copy; 2026 Manajemen Barang CSC. All rights reserved.</p>
             </div>
         </div>
     </body>
