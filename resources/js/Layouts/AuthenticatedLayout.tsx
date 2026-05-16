@@ -17,9 +17,7 @@ import {
     X,
     Bell,
     Moon,
-    Sun,
-    ChevronLeft,
-    ChevronRight
+    Sun
 } from 'lucide-react';
 import { PropsWithChildren, ReactNode, useState, useEffect } from 'react';
 
@@ -29,7 +27,6 @@ export default function Authenticated({
 }: PropsWithChildren<{ header?: ReactNode }>) {
     const user = usePage().props.auth.user;
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [isMinimized, setIsMinimized] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
 
     // Dark mode toggle logic
@@ -72,52 +69,31 @@ export default function Authenticated({
         <div className="h-screen bg-gray-50 dark:bg-gray-950 flex overflow-hidden">
             {/* Sidebar */}
             <aside
-                className={`fixed inset-y-0 left-0 z-50 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 transform 
+                className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-transform duration-300 transform 
                     ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
-                    lg:translate-x-0 lg:static lg:inset-0 shrink-0 
-                    ${isMinimized ? 'w-20' : 'w-64'}`}
+                    lg:translate-x-0 lg:static lg:inset-0 shrink-0`}
             >
                 <div className="flex flex-col h-full">
                     {/* Logo */}
-                    <div className={`h-20 flex items-center border-b border-gray-100 dark:border-gray-800 shrink-0 transition-all duration-300 ${isMinimized ? 'justify-center' : 'justify-between px-6'}`}>
+                    <div className="h-20 flex items-center justify-between px-6 border-b border-gray-100 dark:border-gray-800 shrink-0">
                         <Link href="/" className="flex items-center gap-2">
-                            {isMinimized ? (
-                                <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
-                                    M
-                                </div>
-                            ) : (
-                                <span className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
-                                    Manajemen<span className="text-emerald-600">Barang</span>
-                                </span>
-                            )}
+                            <span className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
+                                Manajemen<span className="text-emerald-600">Barang</span>
+                            </span>
                         </Link>
-
-                        {/* Mobile Close Button */}
-                        <button
+                        <button 
                             onClick={() => setIsSidebarOpen(false)}
                             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden text-gray-500"
                         >
                             <X size={20} />
                         </button>
-
-                        {/* Desktop Minimize Toggle */}
-                        {!isMinimized && (
-                            <button
-                                onClick={() => setIsMinimized(true)}
-                                className="hidden lg:flex p-1.5 rounded-lg border border-gray-100 dark:border-gray-800 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all"
-                            >
-                                <ChevronLeft size={16} />
-                            </button>
-                        )}
                     </div>
 
                     {/* Nav Items */}
                     <nav className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
-                        {!isMinimized && (
-                            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-4">
-                                Menu Utama
-                            </div>
-                        )}
+                        <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-4">
+                            Menu Utama
+                        </div>
                         {filteredItems.map((item) => (
                             <SidebarItem
                                 key={item.label}
@@ -126,41 +102,28 @@ export default function Authenticated({
                                 label={item.label}
                                 active={route().current(item.name)}
                                 onClick={() => setIsSidebarOpen(false)}
-                                isMinimized={isMinimized}
                             />
                         ))}
                     </nav>
 
                     {/* Sidebar Footer */}
-                    <div className={`p-4 border-t border-gray-100 dark:border-gray-800 space-y-1 shrink-0 bg-white dark:bg-gray-900 transition-all duration-300 ${isMinimized ? 'items-center' : ''}`}>
+                    <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-1 shrink-0 bg-white dark:bg-gray-900">
                         <SidebarItem
                             href={route('profile.edit')}
                             icon={Settings}
                             label="Pengaturan Profil"
                             active={route().current('profile.edit')}
                             onClick={() => setIsSidebarOpen(false)}
-                            isMinimized={isMinimized}
                         />
                         <Link
                             href={route('logout')}
                             method="post"
                             as="button"
-                            className={`flex items-center text-gray-600 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 rounded-xl transition-all group ${isMinimized ? 'justify-center p-3 mx-2' : 'gap-3 px-4 py-3 mx-0 w-full'
-                                }`}
+                            className="flex items-center gap-3 w-full px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 rounded-lg transition-colors group"
                         >
-                            <LogOut size={isMinimized ? 22 : 20} className="group-hover:text-red-600 shrink-0" />
-                            {!isMinimized && <span className="font-medium">Keluar Akun</span>}
+                            <LogOut size={20} className="group-hover:text-red-600" />
+                            <span className="font-medium">Keluar Akun</span>
                         </Link>
-
-                        {/* Maximize Toggle Button when Minimized */}
-                        {isMinimized && (
-                            <button
-                                onClick={() => setIsMinimized(false)}
-                                className="hidden lg:flex w-full items-center justify-center py-4 text-gray-400 hover:text-emerald-600"
-                            >
-                                <ChevronRight size={20} />
-                            </button>
-                        )}
                     </div>
                 </div>
             </aside>
