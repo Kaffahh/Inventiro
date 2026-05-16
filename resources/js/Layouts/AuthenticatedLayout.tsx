@@ -1,5 +1,6 @@
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
+import SidebarItem from '@/Components/Atoms/SidebarItem';
 import { Link, usePage } from '@inertiajs/react';
 import {
     LayoutDashboard,
@@ -19,28 +20,6 @@ import {
     Sun
 } from 'lucide-react';
 import { PropsWithChildren, ReactNode, useState, useEffect } from 'react';
-
-interface SidebarItemProps {
-    href: string;
-    icon: any;
-    label: string;
-    active: boolean;
-}
-
-function SidebarItem({ href, icon: Icon, label, active }: SidebarItemProps) {
-    return (
-        <Link
-            href={href}
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${active
-                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200 dark:shadow-none'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600'
-                }`}
-        >
-            <Icon size={20} className={active ? 'text-white' : 'group-hover:text-emerald-600'} />
-            <span className="font-medium">{label}</span>
-        </Link>
-    );
-}
 
 export default function Authenticated({
     header,
