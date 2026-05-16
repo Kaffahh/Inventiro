@@ -66,15 +66,15 @@ export default function Authenticated({
     const filteredItems = sidebarItems.filter(item => item.roles.includes(user.role));
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex">
+        <div className="h-screen bg-gray-50 dark:bg-gray-950 flex overflow-hidden">
             {/* Sidebar */}
             <aside
                 className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-transform duration-300 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-                    } lg:translate-x-0 lg:static lg:inset-0`}
+                    } lg:translate-x-0 lg:static lg:inset-0 shrink-0`}
             >
                 <div className="flex flex-col h-full">
                     {/* Logo */}
-                    <div className="h-20 flex items-center px-6 border-b border-gray-100 dark:border-gray-800">
+                    <div className="h-20 flex items-center px-6 border-b border-gray-100 dark:border-gray-800 shrink-0">
                         <Link href="/" className="flex items-center gap-2">
                             <span className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
                                 Manajemen<span className="text-emerald-600">Barang</span>
@@ -83,7 +83,7 @@ export default function Authenticated({
                     </div>
 
                     {/* Nav Items */}
-                    <nav className="flex-1 overflow-y-auto p-4 space-y-2">
+                    <nav className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
                         <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-4">
                             Menu Utama
                         </div>
@@ -99,7 +99,7 @@ export default function Authenticated({
                     </nav>
 
                     {/* Sidebar Footer */}
-                    <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-1">
+                    <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-1 shrink-0 bg-white dark:bg-gray-900">
                         <SidebarItem
                             href={route('profile.edit')}
                             icon={Settings}
@@ -120,9 +120,9 @@ export default function Authenticated({
             </aside>
 
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col min-w-0">
+            <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
                 {/* Navbar */}
-                <header className="h-20 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-40">
+                <header className="h-20 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-40 shrink-0">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -169,11 +169,14 @@ export default function Authenticated({
                 </header>
 
                 {/* Content */}
-                <main className="flex-1 p-4 lg:p-8">
-                    {children}
+                <main className="flex-1 overflow-y-auto p-4 lg:p-8 custom-scrollbar bg-gray-50 dark:bg-gray-950">
+                    <div className="max-w-7xl mx-auto">
+                        {children}
+                    </div>
                 </main>
             </div>
 
+            {/* Mobile Sidebar Overlay */}
             {!isSidebarOpen && (
                 <div
                     className="fixed inset-0 bg-black/50 z-40 lg:hidden"
