@@ -25,7 +25,8 @@ export default function Authenticated({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
-    const user = usePage().props.auth.user;
+    const { auth } = usePage().props as any;
+    const user = auth.user;
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -66,7 +67,7 @@ export default function Authenticated({
     const filteredItems = sidebarItems.filter(item => item.roles.includes(user.role));
 
     return (
-        <div className="h-screen bg-gray-50 dark:bg-gray-950 flex overflow-hidden">
+        <div className="h-screen bg-gray-50 dark:bg-gray-950 flex overflow-hidden font-poppins">
             {/* Sidebar */}
             <aside
                 className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-transform duration-300 transform 
@@ -81,7 +82,7 @@ export default function Authenticated({
                                 Manajemen<span className="text-emerald-600">Barang</span>
                             </span>
                         </Link>
-                        <button 
+                        <button
                             onClick={() => setIsSidebarOpen(false)}
                             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden text-gray-500"
                         >
@@ -119,7 +120,7 @@ export default function Authenticated({
                             href={route('logout')}
                             method="post"
                             as="button"
-                            className="flex items-center gap-3 w-full px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 rounded-lg transition-colors group"
+                            className="flex items-center gap-3 w-full px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 rounded-xl transition-colors group"
                         >
                             <LogOut size={20} className="group-hover:text-red-600" />
                             <span className="font-medium">Keluar Akun</span>

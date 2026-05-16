@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import StatCard from '@/Components/Molecules/StatCard';
-import { usePage, Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import {
     Package,
     TrendingUp,
@@ -180,7 +180,7 @@ export default function Dashboard({ stats }: { stats: any }) {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                                {transactions.map((tx) => (
+                                {transactions.map((tx: any) => (
                                     <tr key={tx.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
                                         <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{tx.id}</td>
                                         <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{tx.item}</td>
