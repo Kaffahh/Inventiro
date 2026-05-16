@@ -26,7 +26,7 @@ export default function Authenticated({
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
     const user = usePage().props.auth.user;
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
 
     // Dark mode toggle logic
@@ -69,17 +69,24 @@ export default function Authenticated({
         <div className="h-screen bg-gray-50 dark:bg-gray-950 flex overflow-hidden">
             {/* Sidebar */}
             <aside
-                className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-transform duration-300 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-                    } lg:translate-x-0 lg:static lg:inset-0 shrink-0`}
+                className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-transform duration-300 transform 
+                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+                    lg:translate-x-0 lg:static lg:inset-0 shrink-0`}
             >
                 <div className="flex flex-col h-full">
                     {/* Logo */}
-                    <div className="h-20 flex items-center px-6 border-b border-gray-100 dark:border-gray-800 shrink-0">
+                    <div className="h-20 flex items-center justify-between px-6 border-b border-gray-100 dark:border-gray-800 shrink-0">
                         <Link href="/" className="flex items-center gap-2">
                             <span className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
                                 Manajemen<span className="text-emerald-600">Barang</span>
                             </span>
                         </Link>
+                        <button
+                            onClick={() => setIsSidebarOpen(false)}
+                            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden text-gray-500"
+                        >
+                            <X size={20} />
+                        </button>
                     </div>
 
                     {/* Nav Items */}
@@ -94,6 +101,7 @@ export default function Authenticated({
                                 icon={item.icon}
                                 label={item.label}
                                 active={route().current(item.name)}
+                                onClick={() => setIsSidebarOpen(false)}
                             />
                         ))}
                     </nav>
@@ -105,6 +113,7 @@ export default function Authenticated({
                             icon={Settings}
                             label="Pengaturan Profil"
                             active={route().current('profile.edit')}
+                            onClick={() => setIsSidebarOpen(false)}
                         />
                         <Link
                             href={route('logout')}
@@ -125,13 +134,13 @@ export default function Authenticated({
                 <header className="h-20 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-40 shrink-0">
                     <div className="flex items-center gap-4">
                         <button
-                            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                            onClick={() => setIsSidebarOpen(true)}
                             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden"
                         >
                             <Menu size={20} className="text-gray-600 dark:text-gray-400" />
                         </button>
                         {header && (
-                            <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                            <div className="text-lg font-semibold text-gray-900 dark:text-white truncate max-w-[150px] sm:max-w-none">
                                 {header}
                             </div>
                         )}
@@ -153,10 +162,10 @@ export default function Authenticated({
                         <div className="h-8 w-px bg-gray-200 dark:bg-gray-800 mx-2 hidden sm:block"></div>
 
                         <div className="flex items-center gap-3 p-1">
-                            <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold text-sm">
+                            <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold text-sm shrink-0">
                                 {user.name.charAt(0).toUpperCase()}
                             </div>
-                            <div className="hidden sm:block text-left">
+                            <div className="hidden md:block text-left">
                                 <div className="text-sm font-semibold text-gray-900 dark:text-white leading-none">
                                     {user.name}
                                 </div>
@@ -177,10 +186,10 @@ export default function Authenticated({
             </div>
 
             {/* Mobile Sidebar Overlay */}
-            {!isSidebarOpen && (
+            {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-                    onClick={() => setIsSidebarOpen(true)}
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+                    onClick={() => setIsSidebarOpen(false)}
                 ></div>
             )}
         </div>
