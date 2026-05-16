@@ -82,7 +82,7 @@ export default function Authenticated({
                                 Manajemen<span className="text-emerald-600">Barang</span>
                             </span>
                         </Link>
-                        <button 
+                        <button
                             onClick={() => setIsSidebarOpen(false)}
                             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden text-gray-500"
                         >
