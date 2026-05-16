@@ -10,12 +10,18 @@ import {
     ArrowDownRight,
     MoreHorizontal,
     Search,
-    Filter
+    Filter,
+    CheckCircle2,
+    Clock,
+    XCircle
 } from 'lucide-react';
 
 
 
 export default function Dashboard() {
+    const { auth } = usePage().props as any;
+    const user = auth.user;
+
     const transactions = [
         { id: 'TX-001', item: 'Laptop ASUS ROG', type: 'Masuk', qty: 10, status: 'Approved', date: '16 Mei 2026' },
         { id: 'TX-002', item: 'Mouse Logitech G502', type: 'Keluar', qty: 5, status: 'Pending', date: '16 Mei 2026' },
@@ -25,41 +31,72 @@ export default function Dashboard() {
 
     return (
         <AuthenticatedLayout
-            header="Dashboard Overview"
+            header={user.role === 'admin' ? "Admin Dashboard" : "Staff Dashboard Overview"}
         >
             <Head title="Dashboard" />
 
             <div className="space-y-6">
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <StatCard
-                        title="Total Barang"
-                        value="1,240"
-                        icon={Package}
-                        trend="12%"
-                        trendUp={true}
-                        color="bg-emerald-600"
-                    />
-                    <StatCard
-                        title="Total Stok"
-                        value="8,562"
-                        icon={TrendingUp}
-                        trend="5.4%"
-                        trendUp={true}
-                        color="bg-blue-600"
-                    />
-                    <StatCard
-                        title="Stok Menipis"
-                        value="12"
-                        icon={AlertTriangle}
-                        color="bg-orange-500"
-                    />
-                    <StatCard
-                        title="Total Gudang"
-                        value="4"
-                        icon={Warehouse}
-                        color="bg-purple-600"
-                    />
+                    {user.role === 'admin' ? (
+                        <>
+                            <StatCard
+                                title="Total Barang"
+                                value="1,240"
+                                icon={Package}
+                                trend="12%"
+                                trendUp={true}
+                                color="bg-emerald-600"
+                            />
+                            <StatCard
+                                title="Total Stok"
+                                value="8,562"
+                                icon={TrendingUp}
+                                trend="5.4%"
+                                trendUp={true}
+                                color="bg-blue-600"
+                            />
+                            <StatCard
+                                title="Stok Menipis"
+                                value="12"
+                                icon={AlertTriangle}
+                                color="bg-orange-500"
+                            />
+                            <StatCard
+                                title="Total Gudang"
+                                value="4"
+                                icon={Warehouse}
+                                color="bg-purple-600"
+                            />
+                        </>
+                    ) : (
+                        <>
+                            <StatCard
+                                title="Tugas Pending"
+                                value="5"
+                                icon={Clock}
+                                color="bg-yellow-500"
+                            />
+                            <StatCard
+                                title="Input Disetujui"
+                                value="28"
+                                icon={CheckCircle2}
+                                color="bg-emerald-600"
+                            />
+                            <StatCard
+                                title="Input Ditolak"
+                                value="2"
+                                icon={XCircle}
+                                color="bg-red-500"
+                            />
+                            <StatCard
+                                title="Total Aktivitas"
+                                value="35"
+                                icon={TrendingUp}
+                                color="bg-blue-600"
+                            />
+                        </>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

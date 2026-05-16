@@ -53,15 +53,17 @@ export default function Authenticated({
     };
 
     const sidebarItems = [
-        { href: route('dashboard'), icon: LayoutDashboard, label: 'Dashboard', name: 'dashboard' },
-        { href: '#', icon: Package, label: 'Kelola Barang', name: 'barang' },
-        { href: '#', icon: Layers, label: 'Kategori', name: 'kategori' },
-        { href: '#', icon: Warehouse, label: 'Gudang', name: 'gudang' },
-        { href: '#', icon: ArrowUpCircle, label: 'Stok Masuk', name: 'stok-masuk' },
-        { href: '#', icon: ArrowDownCircle, label: 'Stok Keluar', name: 'stok-keluar' },
-        { href: '#', icon: History, label: 'Riwayat', name: 'riwayat' },
-        { href: '#', icon: Users, label: 'Manajemen User', name: 'users' },
+        { href: route('dashboard'), icon: LayoutDashboard, label: 'Dashboard', name: 'dashboard', roles: ['admin', 'staff'] },
+        { href: '#', icon: Package, label: user.role === 'admin' ? 'Kelola Barang' : 'Lihat Barang', name: 'barang', roles: ['admin', 'staff'] },
+        { href: '#', icon: Layers, label: 'Kategori', name: 'kategori', roles: ['admin'] },
+        { href: '#', icon: Warehouse, label: 'Gudang', name: 'gudang', roles: ['admin'] },
+        { href: '#', icon: ArrowUpCircle, label: 'Stok Masuk', name: 'stok-masuk', roles: ['admin', 'staff'] },
+        { href: '#', icon: ArrowDownCircle, label: 'Stok Keluar', name: 'stok-keluar', roles: ['admin', 'staff'] },
+        { href: '#', icon: History, label: 'Riwayat', name: 'riwayat', roles: ['admin', 'staff'] },
+        { href: '#', icon: Users, label: 'Manajemen User', name: 'users', roles: ['admin'] },
     ];
+
+    const filteredItems = sidebarItems.filter(item => item.roles.includes(user.role));
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex">
@@ -85,7 +87,7 @@ export default function Authenticated({
                         <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-4">
                             Menu Utama
                         </div>
-                        {sidebarItems.map((item) => (
+                        {filteredItems.map((item) => (
                             <SidebarItem
                                 key={item.label}
                                 href={item.href}
@@ -155,7 +157,7 @@ export default function Authenticated({
                                             {user.name}
                                         </div>
                                         <div className="text-xs text-gray-500 mt-1 uppercase">
-                                            Admin
+                                            {user.role}
                                         </div>
                                     </div>
                                 </button>
