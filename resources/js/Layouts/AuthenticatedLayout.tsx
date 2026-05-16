@@ -54,7 +54,7 @@ export default function Authenticated({
 
     const sidebarItems = [
         { href: route('dashboard'), icon: LayoutDashboard, label: 'Dashboard', name: 'dashboard', roles: ['admin', 'staff'] },
-        { href: '#', icon: Package, label: user.role === 'admin' ? 'Kelola Barang' : 'Lihat Barang', name: 'barang', roles: ['admin', 'staff'] },
+        { href: route('barang.index'), icon: Package, label: user.role === 'admin' ? 'Kelola Barang' : 'Lihat Barang', name: 'barang.index', roles: ['admin', 'staff'] },
         { href: '#', icon: Layers, label: 'Kategori', name: 'kategori', roles: ['admin'] },
         { href: '#', icon: Warehouse, label: 'Gudang', name: 'gudang', roles: ['admin'] },
         { href: '#', icon: ArrowUpCircle, label: 'Stok Masuk', name: 'stok-masuk', roles: ['admin', 'staff'] },
@@ -99,7 +99,13 @@ export default function Authenticated({
                     </nav>
 
                     {/* Sidebar Footer */}
-                    <div className="p-4 border-t border-gray-100 dark:border-gray-800">
+                    <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-1">
+                        <SidebarItem
+                            href={route('profile.edit')}
+                            icon={Settings}
+                            label="Pengaturan Profil"
+                            active={route().current('profile.edit')}
+                        />
                         <Link
                             href={route('logout')}
                             method="post"
@@ -107,7 +113,7 @@ export default function Authenticated({
                             className="flex items-center gap-3 w-full px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 rounded-lg transition-colors group"
                         >
                             <LogOut size={20} className="group-hover:text-red-600" />
-                            <span className="font-medium">Keluar</span>
+                            <span className="font-medium">Keluar Akun</span>
                         </Link>
                     </div>
                 </div>
@@ -146,30 +152,19 @@ export default function Authenticated({
 
                         <div className="h-8 w-px bg-gray-200 dark:bg-gray-800 mx-2 hidden sm:block"></div>
 
-                        <Dropdown>
-                            <Dropdown.Trigger>
-                                <button className="flex items-center gap-3 p-1 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                    <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold text-sm">
-                                        {user.name.charAt(0).toUpperCase()}
-                                    </div>
-                                    <div className="hidden sm:block text-left">
-                                        <div className="text-sm font-semibold text-gray-900 dark:text-white leading-none">
-                                            {user.name}
-                                        </div>
-                                        <div className="text-xs text-gray-500 mt-1 uppercase">
-                                            {user.role}
-                                        </div>
-                                    </div>
-                                </button>
-                            </Dropdown.Trigger>
-
-                            <Dropdown.Content>
-                                <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
-                                <Dropdown.Link href={route('logout')} method="post" as="button">
-                                    Log Out
-                                </Dropdown.Link>
-                            </Dropdown.Content>
-                        </Dropdown>
+                        <div className="flex items-center gap-3 p-1">
+                            <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold text-sm">
+                                {user.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="hidden sm:block text-left">
+                                <div className="text-sm font-semibold text-gray-900 dark:text-white leading-none">
+                                    {user.name}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1 uppercase">
+                                    {user.role}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </header>
 
@@ -179,7 +174,6 @@ export default function Authenticated({
                 </main>
             </div>
 
-            {/* Mobile Sidebar Overlay */}
             {!isSidebarOpen && (
                 <div
                     className="fixed inset-0 bg-black/50 z-40 lg:hidden"

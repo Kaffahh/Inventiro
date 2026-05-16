@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import StatCard from '@/Components/Molecules/StatCard';
-import { Head } from '@inertiajs/react';
+import { usePage, Head } from '@inertiajs/react';
 import {
     Package,
     TrendingUp,
@@ -18,16 +18,11 @@ import {
 
 
 
-export default function Dashboard() {
+export default function Dashboard({ stats }: { stats: any }) {
     const { auth } = usePage().props as any;
     const user = auth.user;
 
-    const transactions = [
-        { id: 'TX-001', item: 'Laptop ASUS ROG', type: 'Masuk', qty: 10, status: 'Approved', date: '16 Mei 2026' },
-        { id: 'TX-002', item: 'Mouse Logitech G502', type: 'Keluar', qty: 5, status: 'Pending', date: '16 Mei 2026' },
-        { id: 'TX-003', item: 'Monitor Dell 24"', type: 'Masuk', qty: 15, status: 'Approved', date: '15 Mei 2026' },
-        { id: 'TX-004', item: 'Keyboard Mechanical', type: 'Keluar', qty: 2, status: 'Rejected', date: '15 Mei 2026' },
-    ];
+    const transactions = stats.recent_transactions;
 
     return (
         <AuthenticatedLayout
@@ -42,29 +37,29 @@ export default function Dashboard() {
                         <>
                             <StatCard
                                 title="Total Barang"
-                                value="1,240"
+                                value={stats.total_barang.toString()}
                                 icon={Package}
-                                trend="12%"
+                                trend="Data Real"
                                 trendUp={true}
                                 color="bg-emerald-600"
                             />
                             <StatCard
                                 title="Total Stok"
-                                value="8,562"
+                                value={stats.total_stok.toLocaleString()}
                                 icon={TrendingUp}
-                                trend="5.4%"
+                                trend="Total Unit"
                                 trendUp={true}
                                 color="bg-blue-600"
                             />
                             <StatCard
                                 title="Stok Menipis"
-                                value="12"
+                                value={stats.stok_menipis.toString()}
                                 icon={AlertTriangle}
                                 color="bg-orange-500"
                             />
                             <StatCard
-                                title="Total Gudang"
-                                value="4"
+                                title="Aktivitas Transaksi"
+                                value={stats.total_transaksi.toString()}
                                 icon={Warehouse}
                                 color="bg-purple-600"
                             />
@@ -90,8 +85,8 @@ export default function Dashboard() {
                                 color="bg-red-500"
                             />
                             <StatCard
-                                title="Total Aktivitas"
-                                value="35"
+                                title="Aktivitas Saya"
+                                value="12"
                                 icon={TrendingUp}
                                 color="bg-blue-600"
                             />
@@ -103,24 +98,20 @@ export default function Dashboard() {
                     {/* Charts Placeholder */}
                     <div className="lg:col-span-2 bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Statistik Transaksi</h3>
-                            <select className="text-sm border-gray-200 dark:border-gray-800 rounded-lg dark:bg-gray-800 dark:text-white">
-                                <option>7 Hari Terakhir</option>
-                                <option>30 Hari Terakhir</option>
-                            </select>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Statistik Transaksi (7 Hari Terakhir)</h3>
                         </div>
                         <div className="h-64 flex items-end justify-between gap-2 px-2">
-                            {[40, 70, 45, 90, 65, 80, 50].map((height, i) => (
+                            {stats.chart_data.map((data: any, i: number) => (
                                 <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
                                     <div
                                         className="w-full bg-emerald-100 dark:bg-emerald-900/30 rounded-t-lg transition-all duration-300 group-hover:bg-emerald-500 relative"
-                                        style={{ height: `${height}%` }}
+                                        style={{ height: `${(data.count / 20) * 100}%`, minHeight: '10%' }}
                                     >
                                         <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                            {height} Transaksi
+                                            {data.count} Transaksi
                                         </div>
                                     </div>
-                                    <span className="text-[10px] text-gray-400 font-medium">Sen, {i + 10}</span>
+                                    <span className="text-[10px] text-gray-400 font-medium">{data.date}</span>
                                 </div>
                             ))}
                         </div>
