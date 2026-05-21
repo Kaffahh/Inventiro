@@ -10,15 +10,6 @@ use App\Models\Barang;
 use Carbon\Carbon;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
-
-Route::get('/dashboard', function () {
     $stats = [
         'total_barang' => Barang::count(),
         'total_stok' => Barang::sum('stok'),
@@ -27,9 +18,9 @@ Route::get('/dashboard', function () {
         'recent_transactions' => Transaksi::with(['user', 'gudang'])->latest()->take(5)->get()->map(function($tx) {
             return [
                 'id' => 'TX-' . str_pad($tx->id, 3, '0', STR_PAD_LEFT),
-                'item' => 'Multiple Items', // Simplify for now
+                'item' => 'Multiple Items',
                 'type' => ucfirst($tx->tipe),
-                'qty' => 0, // Would need detail sum
+                'qty' => 0,
                 'status' => ucfirst($tx->status),
                 'date' => Carbon::parse($tx->tgl_transaksi)->format('d M Y'),
             ];
@@ -45,10 +36,6 @@ Route::get('/dashboard', function () {
         'stats' => $stats
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::get('/barang', function () {
-    return Inertia::render('Barang/Index');
-})->middleware(['auth', 'verified'])->name('barang.index');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
