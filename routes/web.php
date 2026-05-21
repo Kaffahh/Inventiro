@@ -9,6 +9,15 @@ use App\Models\Barang;
 use Carbon\Carbon;
 
 Route::get('/', function () {
+    return Inertia::render('Welcome', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
+    ]);
+});
+
+Route::get('/dashboard', function () {
     $stats = [
         'total_barang' => Barang::count(),
         'total_stok' => Barang::sum('stok'),
