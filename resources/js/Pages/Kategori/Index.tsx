@@ -31,11 +31,11 @@ interface PaginatedData<T> {
 }
 
 export default function KategoriIndex() {
-    const { kategoris, filters, flash } = usePage().props as any as {
-        kategoris: PaginatedData<Kategori>;
-        filters: { search: string | null };
-        flash: { success: string | null; error: string | null };
-    };
+    const { 
+        kategoris = { data: [], total: 0, from: 0, to: 0, prev_page_url: null, next_page_url: null }, 
+        filters = { search: '' }, 
+        flash = { success: null, error: null } 
+    } = usePage().props as any;
 
     const { auth } = usePage().props as any;
     const user = auth.user;
@@ -190,7 +190,7 @@ export default function KategoriIndex() {
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                                 {kategoris.data.length > 0 ? (
-                                    kategoris.data.map((item) => (
+                                    kategoris.data.map((item: Kategori) => (
                                         <tr key={item.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors group">
                                             <td className="px-6 py-4 text-sm font-medium text-gray-500">
                                                 #{item.id}
