@@ -121,26 +121,31 @@ export default function Dashboard({ stats }: { stats: any }) {
                     <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Stok Menipis</h3>
                         <div className="space-y-4">
-                            {[
-                                { name: 'SSD Samsung 1TB', stock: 2, min: 5 },
-                                { name: 'RAM Corsair 16GB', stock: 1, min: 10 },
-                                { name: 'Power Supply 750W', stock: 4, min: 8 },
-                            ].map((item, i) => (
-                                <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-orange-600">
-                                            <AlertTriangle size={18} />
+                            {stats.low_stock_items && stats.low_stock_items.length > 0 ? (
+                                stats.low_stock_items.map((item: any, i: number) => (
+                                    <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-orange-600">
+                                                <AlertTriangle size={18} />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-[130px] sm:max-w-none">{item.name}</p>
+                                                <p className="text-xs text-gray-500">Sisa: {item.stock} unit</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{item.name}</p>
-                                            <p className="text-xs text-gray-500">Sisa: {item.stock} unit</p>
-                                        </div>
+                                        <span className="text-[10px] px-2 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 font-bold">
+                                            CRITICAL
+                                        </span>
                                     </div>
-                                    <span className="text-[10px] px-2 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 font-bold">
-                                        CRITICAL
-                                    </span>
+                                ))
+                            ) : (
+                                <div className="flex flex-col items-center justify-center py-6 text-center">
+                                    <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600 mb-2">
+                                        <CheckCircle2 size={18} />
+                                    </div>
+                                    <p className="text-xs font-semibold text-gray-500">Semua stok barang aman.</p>
                                 </div>
-                            ))}
+                            )}
                         </div>
                         <button className="w-full mt-6 py-3 text-sm font-semibold text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-colors">
                             Lihat Semua Alert
