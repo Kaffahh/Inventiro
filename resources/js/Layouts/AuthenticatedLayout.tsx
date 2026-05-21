@@ -56,7 +56,7 @@ export default function Authenticated({
     const sidebarItems = [
         { href: route('dashboard'), icon: LayoutDashboard, label: 'Dashboard', name: 'dashboard', roles: ['admin', 'staff'] },
         { href: route('barang.index'), icon: Package, label: user.role === 'admin' ? 'Kelola Barang' : 'Lihat Barang', name: 'barang.index', roles: ['admin', 'staff'] },
-        { href: '#', icon: Layers, label: 'Kategori', name: 'kategori', roles: ['admin'] },
+        { href: route('kategori.index'), icon: Layers, label: 'Kategori', name: 'kategori.index', roles: ['admin'] },
         { href: '#', icon: Warehouse, label: 'Gudang', name: 'gudang', roles: ['admin'] },
         { href: '#', icon: ArrowUpCircle, label: 'Stok Masuk', name: 'stok-masuk', roles: ['admin', 'staff'] },
         { href: '#', icon: ArrowDownCircle, label: 'Stok Keluar', name: 'stok-keluar', roles: ['admin', 'staff'] },

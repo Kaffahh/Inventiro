@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\KategoriController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -57,6 +58,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/barang', function () {
         return Inertia::render('Barang/Index');
     })->name('barang.index');
+
+    Route::resource('kategori', KategoriController::class);
 });
 
 require __DIR__.'/auth.php';
