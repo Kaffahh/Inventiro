@@ -66,14 +66,14 @@ class DummyDataSeeder extends Seeder
         foreach ($barangs as $b) Barang::create($b);
 
         // 4. Seed Dummy Transactions for Statistics
-        $admin = User::where('email', 'admin@gmail.com')->first();
+        $admin = User::where('email', 'admin@inventiro.com')->first();
         $allBarangs = Barang::all();
 
         // Create transactions for the last 6 months
         for ($i = 0; $i < 60; $i++) {
             $tipe = rand(0, 1) ? 'masuk' : 'keluar';
             $tgl = Carbon::now()->subDays(rand(0, 180));
-            
+
             $transaksi = Transaksi::create([
                 'user_id' => $admin->id,
                 'gudang_id' => rand(0, 1) ? $gudangUtama->id : $gudangDepok->id,
