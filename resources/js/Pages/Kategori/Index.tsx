@@ -8,7 +8,10 @@ import {
     Layers,
     X,
     AlertTriangle,
-    ArrowUpDown
+    ArrowUpDown,
+    Cpu,
+    BriefcaseBusiness,
+    Sparkles
 } from 'lucide-react';
 import React, { useState } from 'react';
 
@@ -29,6 +32,36 @@ interface PaginatedData<T> {
     from: number;
     to: number;
 }
+
+const getCategoryIcon = (name: string) => {
+    const normalizedName = name.toLowerCase();
+
+    if (normalizedName.includes('elektronik')) {
+        return {
+            icon: Cpu,
+            wrapperClass: 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400',
+        };
+    }
+
+    if (normalizedName.includes('alat kantor')) {
+        return {
+            icon: BriefcaseBusiness,
+            wrapperClass: 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400',
+        };
+    }
+
+    if (normalizedName.includes('aksesoris')) {
+        return {
+            icon: Sparkles,
+            wrapperClass: 'bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400',
+        };
+    }
+
+    return {
+        icon: Layers,
+        wrapperClass: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400',
+    };
+};
 
 export default function KategoriIndex() {
     const { 
@@ -196,14 +229,20 @@ export default function KategoriIndex() {
                                                 #{item.id}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                                                        <Layers size={16} />
-                                                    </div>
-                                                    <span className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-emerald-600 transition-colors">
-                                                        {item.name}
-                                                    </span>
-                                                </div>
+                                                {(() => {
+                                                    const { icon: CategoryIcon, wrapperClass } = getCategoryIcon(item.name);
+
+                                                    return (
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${wrapperClass}`}>
+                                                                <CategoryIcon size={16} />
+                                                            </div>
+                                                            <span className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-emerald-600 transition-colors">
+                                                                {item.name}
+                                                            </span>
+                                                        </div>
+                                                    );
+                                                })()}
                                             </td>
                                             <td className="px-6 py-4 text-sm font-mono text-gray-500 dark:text-gray-400">
                                                 {item.slug}
