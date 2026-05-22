@@ -1,21 +1,21 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\GudangController;
+use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserManagementController;
-use Illuminate\Foundation\Application;
+use App\Models\Barang;
+use App\Models\Transaksi;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Models\Transaksi;
-use App\Models\Barang;
-use Carbon\Carbon;
 
 Route::get('/', function () {
     // Generate last 7 days list with default count 0
     $chartData = collect(range(6, 0))->mapWithKeys(function ($daysAgo) {
         $date = Carbon::now()->subDays($daysAgo)->format('Y-m-d');
+
         return [$date => 0];
     });
 
@@ -43,14 +43,14 @@ Route::get('/', function () {
         'total_stok' => Barang::sum('stok'),
         'stok_menipis' => Barang::whereColumn('stok', '<=', 'min_stok')->count(),
         'total_transaksi' => Transaksi::count(),
-        'recent_transactions' => Transaksi::with(['user', 'gudang', 'details.barang'])->latest()->take(5)->get()->map(function($tx) {
+        'recent_transactions' => Transaksi::with(['user', 'gudang', 'details.barang'])->latest()->take(5)->get()->map(function ($tx) {
             $barangNames = $tx->details
                 ->pluck('barang.name')
                 ->filter()
                 ->values();
 
             return [
-                'id' => 'TX-' . str_pad($tx->id, 3, '0', STR_PAD_LEFT),
+                'id' => 'TX-'.str_pad($tx->id, 3, '0', STR_PAD_LEFT),
                 'item' => $barangNames->isNotEmpty() ? $barangNames->implode(', ') : '-',
                 'type' => ucfirst($tx->tipe),
                 'qty' => $tx->details->sum('jumlah'),
@@ -62,18 +62,18 @@ Route::get('/', function () {
             ->latest()
             ->take(3)
             ->get()
-            ->map(function($b) {
+            ->map(function ($b) {
                 return [
                     'name' => $b->name,
                     'stock' => $b->stok,
                     'min' => $b->min_stok,
                 ];
             }),
-        'chart_data' => $formattedChartData
+        'chart_data' => $formattedChartData,
     ];
 
     return Inertia::render('Dashboard', [
-        'stats' => $stats
+        'stats' => $stats,
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 

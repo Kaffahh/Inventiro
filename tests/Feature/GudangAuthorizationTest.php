@@ -8,13 +8,13 @@ if (! function_exists('makeUserWithRoleGudang')) {
     function makeUserWithRoleGudang(string $slug): User
     {
         $role = Role::create([
-            'name' => ucfirst($slug) . ' Gudang',
+            'name' => ucfirst($slug).' Gudang',
             'slug' => $slug,
         ]);
 
         return User::factory()->create([
-            'name' => ucfirst($slug) . ' User',
-            'email' => $slug . '@inventiro.test',
+            'name' => ucfirst($slug).' User',
+            'email' => $slug.'@inventiro.test',
             'password' => bcrypt($slug),
             'role_id' => $role->id,
         ]);

@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kategori;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
 
 class KategoriController extends Controller
 {
@@ -15,6 +15,7 @@ class KategoriController extends Controller
     {
         $this->authorizeResource(Kategori::class, 'kategori');
     }
+
     public function index(Request $request): Response
     {
         $search = $request->input('search');
@@ -30,8 +31,8 @@ class KategoriController extends Controller
         return Inertia::render('Kategori/Index', [
             'kategoris' => $kategoris,
             'filters' => [
-                'search' => $search
-            ]
+                'search' => $search,
+            ],
         ]);
     }
 
@@ -54,7 +55,7 @@ class KategoriController extends Controller
     public function update(Request $request, Kategori $kategori): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:kategoris,name,' . $kategori->id,
+            'name' => 'required|string|max:255|unique:kategoris,name,'.$kategori->id,
         ], [
             'name.required' => 'Nama kategori wajib diisi.',
             'name.unique' => 'Nama kategori sudah digunakan.',

@@ -2,17 +2,17 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\Vite;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Gate;
+use App\Models\Barang;
 use App\Models\Gudang;
 use App\Models\Kategori;
-use App\Models\Barang;
+use App\Models\User;
+use App\Policies\BarangPolicy;
 use App\Policies\GudangPolicy;
 use App\Policies\KategoriPolicy;
-use App\Policies\BarangPolicy;
-use App\Models\User;
 use App\Policies\UserPolicy;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Vite;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
