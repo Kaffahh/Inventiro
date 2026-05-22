@@ -104,7 +104,7 @@ export default function StockIndex() {
                                                 <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{tx.tgl_transaksi}</td>
                                                 <td className="px-6 py-4 text-right">
                                                     <div className="inline-flex items-center gap-2">
-                                                        {canApprove && tx.status === 'pending' && (
+                                                        {canApprove && auth.user?.role?.slug === 'admin' && tx.status === 'pending' && (
                                                             <>
                                                                 <button onClick={() => { if (confirm('Approve transaksi ini?')) router.post(route('stok.approve', tx.id)); }} className="p-2 text-green-600 hover:bg-green-50 rounded-lg">
                                                                     <Check size={16} />

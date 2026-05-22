@@ -5,8 +5,9 @@ import React, { useState } from 'react';
 
 export default function UserManagementIndex() {
     const { users = { data: [] }, roles = [] , auth } = usePage().props as any;
-    const form = useForm({ name: '', email: '', password: '', role_id: '' });
-    const editForm = useForm({ id: '', name: '', email: '', role_id: '', password: '' });
+    const { gudangs = [] } = usePage().props as any;
+    const form = useForm({ name: '', email: '', password: '', role_id: '', gudang_id: '' });
+    const editForm = useForm({ id: '', name: '', email: '', role_id: '', password: '', gudang_id: '' });
     const [editing, setEditing] = useState<any>(null);
 
     const submit = (e: any) => {
@@ -60,6 +61,13 @@ export default function UserManagementIndex() {
                             </select>
                             <InputError message={form.errors.role_id} className="mt-1" />
                         </div>
+                        <div>
+                            <select className="w-full rounded-xl border px-4 py-2" value={form.data.gudang_id} onChange={e => form.setData('gudang_id', e.target.value)}>
+                                <option value="">Pilih gudang (untuk staff)</option>
+                                {gudangs.map((g: any) => (<option key={g.id} value={g.id}>{g.name}</option>))}
+                            </select>
+                            <InputError message={form.errors.gudang_id} className="mt-1" />
+                        </div>
                     </div>
                     <div className="mt-4 flex justify-end">
                         <button type="submit" disabled={form.processing} className="px-4 py-2 rounded-xl bg-emerald-600 text-white disabled:opacity-60">
@@ -97,13 +105,20 @@ export default function UserManagementIndex() {
                                     <input className="w-full rounded-xl border px-4 py-2" value={editForm.data.email} onChange={e => editForm.setData('email', e.target.value)} />
                                     <InputError message={editForm.errors.email} className="mt-1" />
                                 </div>
-                                <div>
-                                    <select className="w-full rounded-xl border px-4 py-2" value={editForm.data.role_id} onChange={e => editForm.setData('role_id', e.target.value)}>
-                                        <option value="">Pilih role</option>
-                                        {roles.map((r: any) => (<option key={r.id} value={r.id}>{r.name}</option>))}
-                                    </select>
-                                    <InputError message={editForm.errors.role_id} className="mt-1" />
-                                </div>
+                                        <div>
+                                            <select className="w-full rounded-xl border px-4 py-2" value={editForm.data.role_id} onChange={e => editForm.setData('role_id', e.target.value)}>
+                                                <option value="">Pilih role</option>
+                                                {roles.map((r: any) => (<option key={r.id} value={r.id}>{r.name}</option>))}
+                                            </select>
+                                            <InputError message={editForm.errors.role_id} className="mt-1" />
+                                        </div>
+                                        <div>
+                                            <select className="w-full rounded-xl border px-4 py-2" value={editForm.data.gudang_id} onChange={e => editForm.setData('gudang_id', e.target.value)}>
+                                                <option value="">Pilih gudang (untuk staff)</option>
+                                                {gudangs.map((g: any) => (<option key={g.id} value={g.id}>{g.name}</option>))}
+                                            </select>
+                                            <InputError message={editForm.errors.gudang_id} className="mt-1" />
+                                        </div>
                                 <div>
                                     <input placeholder="Kosongkan untuk tidak merubah password" type="password" className="w-full rounded-xl border px-4 py-2" value={editForm.data.password} onChange={e => editForm.setData('password', e.target.value)} />
                                     <InputError message={editForm.errors.password} className="mt-1" />

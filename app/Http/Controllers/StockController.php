@@ -100,7 +100,14 @@ class StockController extends Controller
             ]);
 
             foreach ($validated['items'] as $it) {
-                $barang = Barang::lockForUpdate()->find($it['barang_id']);
+                // ensure the barang belongs to the selected gudang
+                $barang = Barang::where('id', $it['barang_id'])
+                    ->where('gudang_id', $validated['gudang_id'])
+                    ->lockForUpdate()
+                    ->first();
+                if (! $barang) {
+                    throw new \Exception("Barang ID {$it['barang_id']} tidak ditemukan di gudang yang dipilih.");
+                }
                 $jumlah = (int) $it['jumlah'];
 
                 $barang->stok = $barang->stok + $jumlah;
@@ -140,7 +147,13 @@ class StockController extends Controller
         $result = DB::transaction(function () use ($validated, $user) {
             // First validate stock availability under lock
             foreach ($validated['items'] as $it) {
-                $barang = Barang::lockForUpdate()->find($it['barang_id']);
+                $barang = Barang::where('id', $it['barang_id'])
+                    ->where('gudang_id', $validated['gudang_id'])
+                    ->lockForUpdate()
+                    ->first();
+                if (! $barang) {
+                    return ['ok' => false, 'message' => "Barang ID {$it['barang_id']} tidak ditemukan di gudang yang dipilih."];
+                }
                 $jumlah = (int) $it['jumlah'];
                 if ($barang->stok < $jumlah) {
                     return ['ok' => false, 'message' => "Stok tidak cukup untuk {$barang->name}. Tersedia: {$barang->stok}"];
