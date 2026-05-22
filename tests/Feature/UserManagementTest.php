@@ -1,22 +1,22 @@
 <?php
 
+use App\Models\Audit;
 use App\Models\Role;
 use App\Models\User;
-use App\Models\Audit;
 use Illuminate\Support\Facades\Hash;
 
 if (! function_exists('makeUserWithRoleUnique')) {
     function makeUserWithRoleUnique(string $slug): User
     {
         $role = Role::firstOrCreate([
-            'slug' => $slug
+            'slug' => $slug,
         ], [
-            'name' => ucfirst($slug) . ' Role'
+            'name' => ucfirst($slug).' Role',
         ]);
 
         return User::factory()->create([
-            'name' => ucfirst($slug) . ' User',
-            'email' => $slug . '@inventiro.test',
+            'name' => ucfirst($slug).' User',
+            'email' => $slug.'@inventiro.test',
             'password' => bcrypt($slug),
             'role_id' => $role->id,
         ]);

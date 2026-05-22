@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Barang;
-use App\Models\Kategori;
 use App\Models\Gudang;
+use App\Models\Kategori;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
 
 class BarangController extends Controller
 {
@@ -17,6 +17,7 @@ class BarangController extends Controller
     {
         $this->authorizeResource(Barang::class, 'barang');
     }
+
     /**
      * Display a listing of the resource.
      */
@@ -31,7 +32,7 @@ class BarangController extends Controller
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('sku', 'like', "%{$search}%");
+                        ->orWhere('sku', 'like', "%{$search}%");
                 });
             })
             ->when($kategoriId, function ($query, $kategoriId) {
@@ -61,7 +62,7 @@ class BarangController extends Controller
                 'kategori_id' => $kategoriId,
                 'stok_status' => $stokStatus,
                 'sort_stok' => $sortStok,
-            ]
+            ],
         ]);
     }
 
@@ -110,8 +111,8 @@ class BarangController extends Controller
     public function update(Request $request, Barang $barang): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:barangs,name,' . $barang->id,
-            'sku' => 'required|string|max:100|unique:barangs,sku,' . $barang->id,
+            'name' => 'required|string|max:255|unique:barangs,name,'.$barang->id,
+            'sku' => 'required|string|max:100|unique:barangs,sku,'.$barang->id,
             'kategori_id' => 'required|exists:kategoris,id',
             'gudang_id' => 'required|exists:gudangs,id',
             'stok' => 'required|integer|min:0',

@@ -8,14 +8,14 @@ use Illuminate\Support\Facades\Storage;
 class Barang extends Model
 {
     protected $fillable = [
-        'name', 
-        'sku', 
-        'foto', 
-        'kategori_id', 
-        'gudang_id', 
-        'stok', 
-        'min_stok', 
-        'deskripsi'
+        'name',
+        'sku',
+        'foto',
+        'kategori_id',
+        'gudang_id',
+        'stok',
+        'min_stok',
+        'deskripsi',
     ];
 
     public function kategori()

@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Gudang;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
 
 class GudangController extends Controller
 {
@@ -14,13 +14,14 @@ class GudangController extends Controller
     {
         $this->authorizeResource(Gudang::class, 'gudang');
     }
+
     public function index(Request $request): Response
     {
         $search = $request->input('search');
 
         $gudangs = Gudang::when($search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%");
-            })
+            $query->where('name', 'like', "%{$search}%");
+        })
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -28,8 +29,8 @@ class GudangController extends Controller
         return Inertia::render('Gudang/Index', [
             'gudangs' => $gudangs,
             'filters' => [
-                'search' => $search
-            ]
+                'search' => $search,
+            ],
         ]);
     }
 
@@ -51,7 +52,7 @@ class GudangController extends Controller
     public function update(Request $request, Gudang $gudang): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:gudangs,name,' . $gudang->id,
+            'name' => 'required|string|max:255|unique:gudangs,name,'.$gudang->id,
             'alamat' => 'nullable|string|max:1000',
         ], [
             'name.required' => 'Nama gudang wajib diisi.',
