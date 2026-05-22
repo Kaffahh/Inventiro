@@ -42,6 +42,8 @@ it('allows admin to create update and delete users', function () {
     $this->assertDatabaseHas('audits', ['action' => 'user.create']);
     $createAudit = Audit::where('action', 'user.create')->latest()->first();
     expect($createAudit->meta['created_user_id'])->toBe($new->id);
+    expect($createAudit->meta['role_id'])->toBe($role->id);
+    expect($createAudit->user_id)->toBe($admin->id);
 
     $this->actingAs($admin)->put(route('users.update', $new), [
         'name' => 'Staff Updated',
@@ -52,6 +54,8 @@ it('allows admin to create update and delete users', function () {
     $this->assertDatabaseHas('audits', ['action' => 'user.update']);
     $updateAudit = Audit::where('action', 'user.update')->latest()->first();
     expect($updateAudit->meta['updated_user_id'])->toBe($new->id);
+    expect($updateAudit->meta['role_id'])->toBe($role->id);
+    expect($updateAudit->user_id)->toBe($admin->id);
 
     // also update password
     $this->actingAs($admin)->put(route('users.update', $new), [
@@ -63,11 +67,14 @@ it('allows admin to create update and delete users', function () {
 
     $this->assertTrue(Hash::check('newsecurepass', $new->fresh()->password));
 
+    expect(Audit::where('action', 'user.update')->count())->toBe(2);
+
     $this->actingAs($admin)->delete(route('users.destroy', $new))->assertRedirect();
 
     $this->assertDatabaseHas('audits', ['action' => 'user.delete']);
     $deleteAudit = Audit::where('action', 'user.delete')->latest()->first();
     expect($deleteAudit->meta['deleted_user_id'])->toBe($new->id);
+    expect($deleteAudit->user_id)->toBe($admin->id);
 });
 
 it('forbids staff from managing users', function () {
@@ -83,4 +90,9 @@ it('forbids staff from managing users', function () {
         'password' => 'password',
         'role_id' => $role->id,
     ])->assertForbidden();
+
+    $this->assertDatabaseMissing('audits', [
+        'action' => 'user.create',
+        'user_id' => $staff->id,
+    ]);
 });
