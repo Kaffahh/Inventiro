@@ -304,13 +304,9 @@ export default function BarangIndex() {
                     
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={() => { stockForm.reset(); setIsStockInOpen(true); }}
+                            onClick={() => router.get(route('stok.index'))}
                             className="px-3 py-2 rounded-xl border bg-emerald-50 text-emerald-700 text-sm font-semibold"
-                        >Stok Masuk</button>
-                        <button
-                            onClick={() => { stockForm.reset(); setIsStockOutOpen(true); }}
-                            className="px-3 py-2 rounded-xl border bg-red-50 text-red-700 text-sm font-semibold"
-                        >Stok Keluar</button>
+                        >Stok Masuk / Keluar</button>
                         <button 
                             onClick={() => setShowFilters(!showFilters)}
                             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
@@ -980,99 +976,7 @@ export default function BarangIndex() {
             )}
 
             {/* MODAL: View Detail Barang */}
-                        {/* MODAL: Stok Masuk */}
-                        {isStockInOpen && (
-                            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-                                <div className="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800">
-                                    <div className="p-6 border-b flex justify-between items-center">
-                                        <h3 className="text-lg font-bold">Stok Masuk</h3>
-                                        <button onClick={() => setIsStockInOpen(false)} className="p-1 rounded-lg">×</button>
-                                    </div>
-                                    <form onSubmit={submitStock('masuk')}> 
-                                        <div className="p-6 space-y-4">
-                                            <div className="space-y-1">
-                                                <label className="text-sm font-semibold">Pilih Gudang</label>
-                                                <select className="w-full rounded-xl border px-4 py-2" value={stockForm.data.gudang_id} onChange={e => stockForm.setData('gudang_id', e.target.value)} required>
-                                                    <option value="">Pilih Gudang</option>
-                                                    {gudangs.map((g: any) => (<option key={g.id} value={g.id}>{g.name}</option>))}
-                                                </select>
-                                            </div>
-
-                                            {stockForm.data.items.map((row: any, idx: number) => (
-                                                <div key={idx} className="grid grid-cols-3 gap-2 items-end">
-                                                    <select className="rounded-xl border px-3 py-2" value={row.barang_id} onChange={e => {
-                                                        const items = [...stockForm.data.items]; items[idx].barang_id = e.target.value; stockForm.setData('items', items);
-                                                    }} required>
-                                                        <option value="">Pilih Barang</option>
-                                                        {barangs.data.map((b: any) => (<option key={b.id} value={b.id}>{b.name}</option>))}
-                                                    </select>
-                                                    <input type="number" min="1" className="rounded-xl border px-3 py-2" value={row.jumlah} onChange={e => {
-                                                        const items = [...stockForm.data.items]; items[idx].jumlah = e.target.value; stockForm.setData('items', items);
-                                                    }} required />
-                                                    <div className="flex gap-2">
-                                                        <button type="button" onClick={() => addStockRow()} className="px-3 py-2 rounded-xl border">Tambah</button>
-                                                        {stockForm.data.items.length > 1 && (
-                                                            <button type="button" onClick={() => removeStockRow(idx)} className="px-3 py-2 rounded-xl border text-red-600">Hapus</button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <div className="p-4 flex justify-end gap-2 border-t">
-                                            <button type="button" onClick={() => setIsStockInOpen(false)} className="px-4 py-2 rounded-xl">Batal</button>
-                                            <button type="submit" className="px-4 py-2 rounded-xl bg-emerald-600 text-white">Catat Masuk</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* MODAL: Stok Keluar */}
-                        {isStockOutOpen && (
-                            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-                                <div className="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800">
-                                    <div className="p-6 border-b flex justify-between items-center">
-                                        <h3 className="text-lg font-bold">Stok Keluar</h3>
-                                        <button onClick={() => setIsStockOutOpen(false)} className="p-1 rounded-lg">×</button>
-                                    </div>
-                                    <form onSubmit={submitStock('keluar')}> 
-                                        <div className="p-6 space-y-4">
-                                            <div className="space-y-1">
-                                                <label className="text-sm font-semibold">Pilih Gudang</label>
-                                                <select className="w-full rounded-xl border px-4 py-2" value={stockForm.data.gudang_id} onChange={e => stockForm.setData('gudang_id', e.target.value)} required>
-                                                    <option value="">Pilih Gudang</option>
-                                                    {gudangs.map((g: any) => (<option key={g.id} value={g.id}>{g.name}</option>))}
-                                                </select>
-                                            </div>
-
-                                            {stockForm.data.items.map((row: any, idx: number) => (
-                                                <div key={idx} className="grid grid-cols-3 gap-2 items-end">
-                                                    <select className="rounded-xl border px-3 py-2" value={row.barang_id} onChange={e => {
-                                                        const items = [...stockForm.data.items]; items[idx].barang_id = e.target.value; stockForm.setData('items', items);
-                                                    }} required>
-                                                        <option value="">Pilih Barang</option>
-                                                        {barangs.data.map((b: any) => (<option key={b.id} value={b.id}>{b.name}</option>))}
-                                                    </select>
-                                                    <input type="number" min="1" className="rounded-xl border px-3 py-2" value={row.jumlah} onChange={e => {
-                                                        const items = [...stockForm.data.items]; items[idx].jumlah = e.target.value; stockForm.setData('items', items);
-                                                    }} required />
-                                                    <div className="flex gap-2">
-                                                        <button type="button" onClick={() => addStockRow()} className="px-3 py-2 rounded-xl border">Tambah</button>
-                                                        {stockForm.data.items.length > 1 && (
-                                                            <button type="button" onClick={() => removeStockRow(idx)} className="px-3 py-2 rounded-xl border text-red-600">Hapus</button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <div className="p-4 flex justify-end gap-2 border-t">
-                                            <button type="button" onClick={() => setIsStockOutOpen(false)} className="px-4 py-2 rounded-xl">Batal</button>
-                                            <button type="submit" className="px-4 py-2 rounded-xl bg-red-600 text-white">Catat Keluar</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        )}
+                        {/* Stock flows moved to dedicated page at stok.index to keep UI consistent */}
             {isViewOpen && selectedBarang && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-800 transform scale-100 transition-all duration-300 animate-in fade-in zoom-in-95">

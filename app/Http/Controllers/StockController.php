@@ -83,7 +83,7 @@ class StockController extends Controller
                 'user_id' => $user->id,
                 'gudang_id' => $validated['gudang_id'],
                 'tipe' => 'masuk',
-                'status' => 'approved',
+                'status' => 'pending',
                 'tgl_transaksi' => now(),
             ]);
 
@@ -139,7 +139,7 @@ class StockController extends Controller
                 'user_id' => $user->id,
                 'gudang_id' => $validated['gudang_id'],
                 'tipe' => 'keluar',
-                'status' => 'approved',
+                'status' => 'pending',
                 'tgl_transaksi' => now(),
             ]);
 
