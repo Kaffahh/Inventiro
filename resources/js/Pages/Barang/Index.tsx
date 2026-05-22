@@ -16,6 +16,7 @@ import {
     Upload
 } from 'lucide-react';
 import React, { useState } from 'react';
+import { useForm as useFormInertia } from '@inertiajs/react';
 
 interface Kategori {
     id: number;
@@ -74,6 +75,8 @@ export default function BarangIndex() {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [isViewOpen, setIsViewOpen] = useState(false);
+    const [isStockInOpen, setIsStockInOpen] = useState(false);
+    const [isStockOutOpen, setIsStockOutOpen] = useState(false);
     
     const [selectedBarang, setSelectedBarang] = useState<Barang | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -103,6 +106,33 @@ export default function BarangIndex() {
         foto: null as File | null,
         _method: 'PUT' // Crucial for multipart form uploads in Laravel update
     });
+
+    const stockForm = useFormInertia({
+        gudang_id: '',
+        items: [ { barang_id: '', jumlah: '1' } ],
+    });
+
+    const addStockRow = () => {
+        stockForm.setData('items', [...stockForm.data.items, { barang_id: '', jumlah: '1' }]);
+    };
+
+    const removeStockRow = (index: number) => {
+        const items = stockForm.data.items.filter((_: any, i: number) => i !== index);
+        stockForm.setData('items', items);
+    };
+
+    const submitStock = (type: 'masuk'|'keluar') => (e: React.FormEvent) => {
+        e.preventDefault();
+        const routeName = type === 'masuk' ? 'stok.masuk' : 'stok.keluar';
+        stockForm.post(route(routeName), {
+            onSuccess: () => {
+                setIsStockInOpen(false);
+                setIsStockOutOpen(false);
+                stockForm.reset('items');
+                stockForm.setData('items', [ { barang_id: '', jumlah: '1' } ]);
+            }
+        });
+    };
 
     const handleSearchSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -273,6 +303,10 @@ export default function BarangIndex() {
                     </form>
                     
                     <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => router.get(route('stok.index'))}
+                            className="px-3 py-2 rounded-xl border bg-emerald-50 text-emerald-700 text-sm font-semibold"
+                        >Stok Masuk / Keluar</button>
                         <button 
                             onClick={() => setShowFilters(!showFilters)}
                             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
@@ -942,6 +976,7 @@ export default function BarangIndex() {
             )}
 
             {/* MODAL: View Detail Barang */}
+                        {/* Stock flows moved to dedicated page at stok.index to keep UI consistent */}
             {isViewOpen && selectedBarang && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-800 transform scale-100 transition-all duration-300 animate-in fade-in zoom-in-95">
