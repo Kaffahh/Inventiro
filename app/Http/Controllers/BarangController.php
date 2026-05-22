@@ -94,7 +94,9 @@ class BarangController extends Controller
 
         if ($request->hasFile('foto')) {
             $path = $request->file('foto')->store('barangs', 'public');
-            $validated['foto'] = '/storage/' . $path;
+            // store the storage path (e.g. "barangs/xxx.jpg"). The model accessor
+            // will expose a usable URL when rendering.
+            $validated['foto'] = $path;
         }
 
         Barang::create($validated);
@@ -130,13 +132,21 @@ class BarangController extends Controller
         ]);
 
         if ($request->hasFile('foto')) {
-            if ($barang->foto) {
-                // Delete old image
-                $oldPath = str_replace('/storage/', '', $barang->foto);
+            // Delete old image using the raw stored value (could be path or URL).
+            $old = $barang->getRawOriginal('foto');
+            if ($old) {
+                $oldPath = $old;
+                // Normalize if stored as '/storage/...' or 'storage/...'
+                if (str_starts_with($oldPath, '/storage/')) {
+                    $oldPath = substr($oldPath, 9);
+                } elseif (str_starts_with($oldPath, 'storage/')) {
+                    $oldPath = substr($oldPath, 8);
+                }
                 Storage::disk('public')->delete($oldPath);
             }
+
             $path = $request->file('foto')->store('barangs', 'public');
-            $validated['foto'] = '/storage/' . $path;
+            $validated['foto'] = $path;
         }
 
         $barang->update($validated);
@@ -154,9 +164,16 @@ class BarangController extends Controller
             return redirect()->route('barang.index')->with('error', 'Barang tidak dapat dihapus karena sudah memiliki riwayat transaksi.');
         }
 
-        if ($barang->foto) {
-            $path = str_replace('/storage/', '', $barang->foto);
-            Storage::disk('public')->delete($path);
+        // Remove stored file safely using raw stored value.
+        $old = $barang->getRawOriginal('foto');
+        if ($old) {
+            $oldPath = $old;
+            if (str_starts_with($oldPath, '/storage/')) {
+                $oldPath = substr($oldPath, 9);
+            } elseif (str_starts_with($oldPath, 'storage/')) {
+                $oldPath = substr($oldPath, 8);
+            }
+            Storage::disk('public')->delete($oldPath);
         }
 
         $barang->delete();
