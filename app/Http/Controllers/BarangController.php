@@ -13,6 +13,10 @@ use Illuminate\Http\RedirectResponse;
 
 class BarangController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Barang::class, 'barang');
+    }
     /**
      * Display a listing of the resource.
      */
