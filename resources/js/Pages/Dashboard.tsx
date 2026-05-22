@@ -1,6 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import StatCard from '@/Components/Molecules/StatCard';
 import { Head, usePage } from '@inertiajs/react';
+import { useEffect, useMemo, useState } from 'react';
 import {
     Package,
     TrendingUp,
@@ -16,13 +17,74 @@ import {
     XCircle
 } from 'lucide-react';
 
+type DashboardTransaction = {
+    id: string;
+    item: string;
+    type: string;
+    qty: number;
+    status: string;
+    date: string;
+};
+
+type TransactionTypeFilter = 'Semua' | 'Masuk' | 'Keluar';
+type TransactionStatusFilter = 'Semua' | 'Approved' | 'Pending' | 'Rejected';
 
 
 export default function Dashboard({ stats }: { stats: any }) {
     const { auth } = usePage().props as any;
     const user = auth.user;
+    const [searchTerm, setSearchTerm] = useState('');
+    const [typeFilter, setTypeFilter] = useState<TransactionTypeFilter>('Semua');
+    const [statusFilter, setStatusFilter] = useState<TransactionStatusFilter>('Semua');
+    const [transactions, setTransactions] = useState<DashboardTransaction[]>(stats.recent_transactions ?? []);
+    const [activeActionId, setActiveActionId] = useState<string | null>(null);
+    const [showFilterMenu, setShowFilterMenu] = useState(false);
 
-    const transactions = stats.recent_transactions;
+    useEffect(() => {
+        const initialTransactions = stats.recent_transactions ?? [];
+        setTransactions(initialTransactions);
+        setActiveActionId(null);
+    }, [stats.recent_transactions]);
+
+    const filteredTransactions = useMemo(() => {
+        const query = searchTerm.trim().toLowerCase();
+
+        return transactions.filter((tx) => {
+            const matchesSearch =
+                !query ||
+                [tx.id, tx.item, tx.type, tx.status, tx.date].some((value) =>
+                    value.toLowerCase().includes(query),
+                );
+
+            const matchesType = typeFilter === 'Semua' || tx.type === typeFilter;
+            const matchesStatus = statusFilter === 'Semua' || tx.status === statusFilter;
+
+            return matchesSearch && matchesType && matchesStatus;
+        });
+    }, [transactions, searchTerm, typeFilter, statusFilter]);
+
+    const updateTransactionStatus = (transactionId: string, status: DashboardTransaction['status']) => {
+        setTransactions((currentTransactions) =>
+            currentTransactions.map((transaction) =>
+                transaction.id === transactionId ? { ...transaction, status } : transaction,
+            ),
+        );
+        setActiveActionId(null);
+    };
+
+    const handleCopyTransactionId = async (transactionId: string) => {
+        await navigator.clipboard.writeText(transactionId);
+        setActiveActionId(null);
+    };
+
+    const resetFilters = () => {
+        setSearchTerm('');
+        setTypeFilter('Semua');
+        setStatusFilter('Semua');
+        setShowFilterMenu(false);
+    };
+
+    const transactionsCountLabel = `${filteredTransactions.length} transaksi`;
 
     return (
         <AuthenticatedLayout
@@ -155,21 +217,88 @@ export default function Dashboard({ stats }: { stats: any }) {
 
                 {/* Recent Transactions Table */}
                 <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
-                    <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">Transaksi Terbaru</h3>
-                        <div className="flex items-center gap-2">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                                <input
-                                    type="text"
-                                    placeholder="Cari transaksi..."
-                                    className="pl-10 pr-4 py-2 border-gray-200 dark:border-gray-800 rounded-lg dark:bg-gray-800 dark:text-white text-sm focus:ring-emerald-500 focus:border-emerald-500"
-                                />
+                    <div className="p-6 border-b border-gray-100 dark:border-gray-800 space-y-4">
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Transaksi Terbaru</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                    {transactionsCountLabel} tampil dari {transactions.length} data
+                                </p>
                             </div>
-                            <button className="p-2 border border-gray-200 dark:border-gray-800 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400">
-                                <Filter size={18} />
-                            </button>
+
+                            <div className="flex flex-col sm:flex-row gap-3 sm:items-center w-full lg:w-auto lg:min-w-[520px]">
+                                <div className="relative flex-1">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                    <input
+                                        type="text"
+                                        value={searchTerm}
+                                        onChange={(event) => setSearchTerm(event.target.value)}
+                                        placeholder="Cari ID, barang, tipe, status, atau tanggal..."
+                                        className="w-full pl-10 pr-4 py-2.5 border-gray-200 dark:border-gray-800 rounded-lg dark:bg-gray-800 dark:text-white text-sm focus:ring-emerald-500 focus:border-emerald-500"
+                                    />
+                                </div>
+
+                                <button
+                                    onClick={() => setShowFilterMenu((current) => !current)}
+                                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-800 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shrink-0"
+                                >
+                                    <Filter size={16} />
+                                    Filter
+                                </button>
+                            </div>
                         </div>
+
+                        {showFilterMenu && (
+                            <div className="ml-auto w-full lg:w-auto lg:min-w-[520px] rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40 p-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+                                            Jenis Transaksi
+                                        </label>
+                                        <select
+                                            value={typeFilter}
+                                            onChange={(event) => setTypeFilter(event.target.value as TransactionTypeFilter)}
+                                            className="w-full px-4 py-2.5 border-gray-200 dark:border-gray-800 rounded-lg dark:bg-gray-900 dark:text-white text-sm focus:ring-emerald-500 focus:border-emerald-500"
+                                        >
+                                            <option value="Semua">Semua Jenis</option>
+                                            <option value="Masuk">Masuk</option>
+                                            <option value="Keluar">Keluar</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+                                            Status
+                                        </label>
+                                        <select
+                                            value={statusFilter}
+                                            onChange={(event) => setStatusFilter(event.target.value as TransactionStatusFilter)}
+                                            className="w-full px-4 py-2.5 border-gray-200 dark:border-gray-800 rounded-lg dark:bg-gray-900 dark:text-white text-sm focus:ring-emerald-500 focus:border-emerald-500"
+                                        >
+                                            <option value="Semua">Semua Status</option>
+                                            <option value="Approved">Approved</option>
+                                            <option value="Pending">Pending</option>
+                                            <option value="Rejected">Rejected</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-end gap-2 pt-4">
+                                    <button
+                                        onClick={resetFilters}
+                                        className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-800 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-900 transition-colors"
+                                    >
+                                        Reset
+                                    </button>
+                                    <button
+                                        onClick={() => setShowFilterMenu(false)}
+                                        className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-colors"
+                                    >
+                                        Terapkan
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
@@ -185,35 +314,87 @@ export default function Dashboard({ stats }: { stats: any }) {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                                {transactions.map((tx: any) => (
-                                    <tr key={tx.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
-                                        <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{tx.id}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{tx.item}</td>
-                                        <td className="px-6 py-4">
-                                            <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase ${tx.type === 'Masuk'
-                                                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-                                                : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400'
-                                                }`}>
-                                                {tx.type}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white">{tx.qty}</td>
-                                        <td className="px-6 py-4">
-                                            <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase ${tx.status === 'Approved' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' :
-                                                tx.status === 'Pending' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' :
-                                                    'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-                                                }`}>
-                                                {tx.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{tx.date}</td>
-                                        <td className="px-6 py-4 text-center">
-                                            <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                                                <MoreHorizontal size={18} />
-                                            </button>
+                                {filteredTransactions.length > 0 ? (
+                                    filteredTransactions.map((tx) => (
+                                        <tr key={tx.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+                                            <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{tx.id}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{tx.item}</td>
+                                            <td className="px-6 py-4">
+                                                <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase ${tx.type === 'Masuk'
+                                                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                                                    : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400'
+                                                    }`}>
+                                                    {tx.type}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white">{tx.qty}</td>
+                                            <td className="px-6 py-4">
+                                                <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase ${tx.status === 'Approved' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' :
+                                                    tx.status === 'Pending' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' :
+                                                        'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                                                    }`}>
+                                                    {tx.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{tx.date}</td>
+                                            <td className="px-6 py-4 text-center relative">
+                                                <button
+                                                    onClick={() => setActiveActionId(activeActionId === tx.id ? null : tx.id)}
+                                                    className="inline-flex items-center justify-center h-9 w-9 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                                >
+                                                    <MoreHorizontal size={18} />
+                                                </button>
+
+                                                {activeActionId === tx.id && (
+                                                    <div className="absolute right-6 top-12 z-20 w-52 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-lg p-2 text-left">
+                                                        <button
+                                                            onClick={() => handleCopyTransactionId(tx.id)}
+                                                            className="w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg text-left"
+                                                        >
+                                                            Salin ID transaksi
+                                                        </button>
+                                                        <div className="my-1 border-t border-gray-100 dark:border-gray-800" />
+                                                        <button
+                                                            onClick={() => updateTransactionStatus(tx.id, 'Approved')}
+                                                            className="w-full px-3 py-2 text-sm text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg text-left"
+                                                        >
+                                                            Tandai Approved
+                                                        </button>
+                                                        <button
+                                                            onClick={() => updateTransactionStatus(tx.id, 'Pending')}
+                                                            className="w-full px-3 py-2 text-sm text-yellow-700 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg text-left"
+                                                        >
+                                                            Tandai Pending
+                                                        </button>
+                                                        <button
+                                                            onClick={() => updateTransactionStatus(tx.id, 'Rejected')}
+                                                            className="w-full px-3 py-2 text-sm text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-left"
+                                                        >
+                                                            Tandai Rejected
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={7} className="px-6 py-12 text-center">
+                                            <div className="mx-auto max-w-sm">
+                                                <p className="text-sm font-semibold text-gray-900 dark:text-white">Tidak ada transaksi yang cocok</p>
+                                                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                                    Coba ubah kata kunci pencarian atau reset filter untuk melihat data lain.
+                                                </p>
+                                                <button
+                                                    onClick={resetFilters}
+                                                    className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-colors"
+                                                >
+                                                    Reset Filter
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
-                                ))}
+                                )}
                             </tbody>
                         </table>
                     </div>
