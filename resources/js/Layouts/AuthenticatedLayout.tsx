@@ -58,7 +58,7 @@ export default function Authenticated({
         { href: route('kategori.index'), icon: Layers, label: 'Kategori', name: 'kategori.index', roles: ['admin'] },
         { href: route('gudang.index'), icon: Warehouse, label: 'Gudang', name: 'gudang.index', roles: ['admin'] },
         { href: route('stok.index'), icon: ArrowUpCircle, label: 'Stok', name: 'stok.index', roles: ['admin', 'staff'] },
-        { href: route('profile.edit'), icon: Users, label: 'Manajemen User', name: 'users', roles: ['admin'] },
+        { href: route('users.index'), icon: Users, label: 'Manajemen User', name: 'users.index', roles: ['admin'] },
     ];
 
     const filteredItems = sidebarItems.filter(item => item.roles.includes(user.role));

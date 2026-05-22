@@ -8,9 +8,8 @@ use App\Models\Kategori;
 use App\Models\Transaksi;
 use App\Models\TransaksiDetail;
 use App\Models\User;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class DummyDataSeeder extends Seeder
 {
@@ -22,14 +21,18 @@ class DummyDataSeeder extends Seeder
             ['name' => 'Alat Kantor', 'slug' => 'alat-kantor'],
             ['name' => 'Aksesoris', 'slug' => 'aksesoris'],
         ];
-        foreach ($kategoris as $k) Kategori::create($k);
+        foreach ($kategoris as $k) {
+            Kategori::create($k);
+        }
 
         // 2. Seed Gudangs
         $gudangs = [
             ['name' => 'Gudang Utama', 'alamat' => 'Jakarta Selatan'],
             ['name' => 'Gudang Cabang Depok', 'alamat' => 'Margonda, Depok'],
         ];
-        foreach ($gudangs as $g) Gudang::create($g);
+        foreach ($gudangs as $g) {
+            Gudang::create($g);
+        }
 
         // 3. Seed Barangs
         $katElektronik = Kategori::where('slug', 'elektronik')->first();
@@ -63,7 +66,9 @@ class DummyDataSeeder extends Seeder
                 'min_stok' => 5,
             ],
         ];
-        foreach ($barangs as $b) Barang::create($b);
+        foreach ($barangs as $b) {
+            Barang::create($b);
+        }
 
         // 4. Seed Dummy Transactions for Statistics
         $admin = User::where('email', 'admin@inventiro.com')->first();
