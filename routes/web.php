@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\KategoriController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -9,6 +10,31 @@ use App\Models\Barang;
 use Carbon\Carbon;
 
 Route::get('/', function () {
+    // Generate last 7 days list with default count 0
+    $chartData = collect(range(6, 0))->mapWithKeys(function ($daysAgo) {
+        $date = Carbon::now()->subDays($daysAgo)->format('Y-m-d');
+        return [$date => 0];
+    });
+
+    // Fetch actual transaction count for last 7 days
+    $dbChartData = Transaksi::selectRaw('DATE(tgl_transaksi) as date, COUNT(*) as count')
+        ->where('tgl_transaksi', '>=', Carbon::now()->subDays(6)->startOfDay())
+        ->groupBy('date')
+        ->get();
+
+    foreach ($dbChartData as $row) {
+        if (isset($chartData[$row->date])) {
+            $chartData[$row->date] = $row->count;
+        }
+    }
+
+    $formattedChartData = $chartData->map(function ($count, $date) {
+        return [
+            'date' => Carbon::parse($date)->format('d M'),
+            'count' => $count,
+        ];
+    })->values()->all();
+
     $stats = [
         'total_barang' => Barang::count(),
         'total_stok' => Barang::sum('stok'),
@@ -29,21 +55,24 @@ Route::get('/', function () {
                 'date' => Carbon::parse($tx->tgl_transaksi)->format('d M Y'),
             ];
         }),
-        'chart_data' => Transaksi::selectRaw('DATE(tgl_transaksi) as date, COUNT(*) as count')
-            ->where('tgl_transaksi', '>=', Carbon::now()->subDays(7))
-            ->groupBy('date')
-            ->orderBy('date')
+        'low_stock_items' => Barang::whereColumn('stok', '<=', 'min_stok')
+            ->latest()
+            ->take(3)
             ->get()
+            ->map(function($b) {
+                return [
+                    'name' => $b->name,
+                    'stock' => $b->stok,
+                    'min' => $b->min_stok,
+                ];
+            }),
+        'chart_data' => $formattedChartData
     ];
 
     return Inertia::render('Dashboard', [
         'stats' => $stats
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::get('/barang', function () {
-    return Inertia::render('Barang/Index');
-})->middleware(['auth', 'verified'])->name('barang.index');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -53,6 +82,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/barang', function () {
         return Inertia::render('Barang/Index');
     })->name('barang.index');
+
+    Route::resource('kategori', KategoriController::class);
 });
 
 require __DIR__.'/auth.php';
