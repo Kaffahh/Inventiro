@@ -14,7 +14,10 @@ interface Gudang {
 }
 
 export default function GudangIndex() {
-    const { gudangs = { data: [], total: 0, from: 0, to: 0, prev_page_url: null, next_page_url: null }, filters = { search: '' } } = usePage().props as any;
+    const { gudangs = { data: [], total: 0, from: 0, to: 0, prev_page_url: null, next_page_url: null }, filters = { search: '' }, flash = { success: null, error: null } } = usePage().props as any;
+
+    const { auth } = usePage().props as any;
+    const user = auth.user;
 
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
     const [isAddOpen, setIsAddOpen] = useState(false);
@@ -96,12 +99,25 @@ export default function GudangIndex() {
                     </form>
 
                     <div>
-                        <button onClick={() => { addForm.reset(); setIsAddOpen(true); }} className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl">
-                            <Plus size={16} />
-                            <span>Tambah Gudang</span>
-                        </button>
+                        {user.role === 'admin' && (
+                            <button onClick={() => { addForm.reset(); setIsAddOpen(true); }} className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl">
+                                <Plus size={16} />
+                                <span>Tambah Gudang</span>
+                            </button>
+                        )}
                     </div>
                 </div>
+
+                {flash.success && (
+                    <div className="p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-400 rounded-xl text-sm font-semibold">
+                        {flash.success}
+                    </div>
+                )}
+                {flash.error && (
+                    <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-400 rounded-xl text-sm font-semibold">
+                        {flash.error}
+                    </div>
+                )}
 
                 <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
                     <div className="overflow-x-auto">
@@ -121,21 +137,25 @@ export default function GudangIndex() {
                                             <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{g.alamat || '-'}</td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="inline-flex items-center gap-2">
-                                                    <button
-                                                        onClick={() => openEdit(g)}
-                                                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
-                                                        aria-label={`Edit ${g.name}`}
-                                                    >
-                                                        <Pencil size={16} />
-                                                    </button>
+                                                    {user.role === 'admin' && (
+                                                        <>
+                                                            <button
+                                                                onClick={() => openEdit(g)}
+                                                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
+                                                                aria-label={`Edit ${g.name}`}
+                                                            >
+                                                                <Pencil size={16} />
+                                                            </button>
 
-                                                    <button
-                                                        onClick={() => openDelete(g)}
-                                                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
-                                                        aria-label={`Hapus ${g.name}`}
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
+                                                            <button
+                                                                onClick={() => openDelete(g)}
+                                                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                                                                aria-label={`Hapus ${g.name}`}
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
