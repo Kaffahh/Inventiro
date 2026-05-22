@@ -15,7 +15,6 @@ import {
     LogOut,
     Menu,
     X,
-    Bell,
     Moon,
     Sun
 } from 'lucide-react';
@@ -151,11 +150,6 @@ export default function Authenticated({
                             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
                         >
                             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-                        </button>
-
-                        <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 relative">
-                            <Bell size={20} />
-                            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-gray-900"></span>
                         </button>
 
                         <div className="h-8 w-px bg-gray-200 dark:bg-gray-800 mx-2 hidden sm:block"></div>

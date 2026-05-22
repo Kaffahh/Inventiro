@@ -29,11 +29,17 @@ class StockController extends Controller
         $gudangs = Gudang::all();
         $barangs = Barang::latest()->paginate(50);
 
+        $user = $request->user();
+
         return Inertia::render('Stock/Index', [
             'transaksis' => $transaksis,
             'gudangs' => $gudangs,
             'barangs' => $barangs,
-            'filters' => ['q' => $q]
+            'filters' => ['q' => $q],
+            // server-provided permission flags to avoid relying on client-side role checks
+            'canCreateTransaksi' => $user ? $user->can('create', Transaksi::class) : false,
+            // some policies expect a Transaksi instance; creating a fresh instance for ability check is fine
+            'canApprove' => $user ? $user->can('approve', new Transaksi()) : false,
         ]);
     }
 
