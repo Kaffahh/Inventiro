@@ -31,6 +31,40 @@ class StockController extends Controller
         ]);
     }
 
+    public function approve(Request $request, Transaksi $transaksi)
+    {
+        $this->authorize('approve', $transaksi);
+
+        $transaksi->status = 'approved';
+        $transaksi->save();
+
+        Audit::create([
+            'user_id' => $request->user()->id,
+            'transaksi_id' => $transaksi->id,
+            'action' => 'approve',
+            'meta' => ['status' => 'approved'],
+        ]);
+
+        return redirect()->back()->with('success', 'Transaksi approved.');
+    }
+
+    public function reject(Request $request, Transaksi $transaksi)
+    {
+        $this->authorize('reject', $transaksi);
+
+        $transaksi->status = 'rejected';
+        $transaksi->save();
+
+        Audit::create([
+            'user_id' => $request->user()->id,
+            'transaksi_id' => $transaksi->id,
+            'action' => 'reject',
+            'meta' => ['status' => 'rejected'],
+        ]);
+
+        return redirect()->back()->with('success', 'Transaksi rejected.');
+    }
+
     // Stok masuk
     public function masuk(Request $request)
     {

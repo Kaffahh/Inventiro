@@ -26,4 +26,14 @@ class TransaksiPolicy
     {
         return $user->role?->slug === 'admin';
     }
+
+    public function approve(User $user, Transaksi $transaksi): bool
+    {
+        return $user->role?->slug === 'admin';
+    }
+
+    public function reject(User $user, Transaksi $transaksi): bool
+    {
+        return $user->role?->slug === 'admin';
+    }
 }

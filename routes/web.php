@@ -88,6 +88,8 @@ Route::middleware('auth')->group(function () {
     Route::get('stok', [App\Http\Controllers\StockController::class, 'index'])->name('stok.index');
     Route::post('stok/masuk', [App\Http\Controllers\StockController::class, 'masuk'])->name('stok.masuk');
     Route::post('stok/keluar', [App\Http\Controllers\StockController::class, 'keluar'])->name('stok.keluar');
+    Route::post('stok/{transaksi}/approve', [App\Http\Controllers\StockController::class, 'approve'])->name('stok.approve');
+    Route::post('stok/{transaksi}/reject', [App\Http\Controllers\StockController::class, 'reject'])->name('stok.reject');
 });
 
 require __DIR__.'/auth.php';
