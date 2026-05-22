@@ -19,7 +19,7 @@ export default function UserManagementIndex() {
 
     const openEdit = (u: any) => {
         setEditing(u.id);
-        editForm.setData({ id: u.id, name: u.name, email: u.email, role_id: u.role_id, password: '' });
+        editForm.setData({ id: u.id, name: u.name, email: u.email, role_id: u.role_id, password: '', gudang_id: u.gudang_id ?? '' });
         editForm.clearErrors();
     };
 

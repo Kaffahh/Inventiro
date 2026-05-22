@@ -169,8 +169,17 @@ class StockController extends Controller
             ]);
 
             foreach ($validated['items'] as $it) {
-                $barang = Barang::lockForUpdate()->find($it['barang_id']);
+                // re-query the barang under the same gudang and lock it
+                $barang = Barang::where('id', $it['barang_id'])
+                    ->where('gudang_id', $validated['gudang_id'])
+                    ->lockForUpdate()
+                    ->first();
                 $jumlah = (int) $it['jumlah'];
+
+                if (! $barang) {
+                    // this should not happen because we validated earlier, but guard anyway
+                    return ['ok' => false, 'message' => "Barang ID {$it['barang_id']} tidak ditemukan di gudang yang dipilih."];
+                }
 
                 $barang->stok = $barang->stok - $jumlah;
                 $barang->save();
