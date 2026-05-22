@@ -70,7 +70,7 @@ export default function StockIndex() {
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-6">
                     <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
                         <h3 className="text-lg font-bold mb-4">{activeTab === 'masuk' ? 'Catat Stok Masuk' : 'Catat Stok Keluar'}</h3>
                         <StockForm mode={activeTab} gudangs={gudangs} barangs={barangs.data} />
