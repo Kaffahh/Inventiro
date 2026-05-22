@@ -57,6 +57,7 @@ export default function Authenticated({
         { href: route('barang.index'), icon: Package, label: user.role === 'admin' ? 'Kelola Barang' : 'Lihat Barang', name: 'barang.index', roles: ['admin', 'staff'] },
         { href: route('kategori.index'), icon: Layers, label: 'Kategori', name: 'kategori.index', roles: ['admin'] },
         { href: route('gudang.index'), icon: Warehouse, label: 'Gudang', name: 'gudang.index', roles: ['admin'] },
+        { href: route('staff.index'), icon: History, label: 'Tugas Saya', name: 'staff.index', roles: ['staff'] },
         { href: route('stok.index'), icon: ArrowUpCircle, label: 'Stok', name: 'stok.index', roles: ['admin', 'staff'] },
         { href: route('users.index'), icon: Users, label: 'Manajemen User', name: 'users.index', roles: ['admin'] },
     ];
