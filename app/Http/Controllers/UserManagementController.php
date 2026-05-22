@@ -40,6 +40,57 @@ class UserManagementController extends Controller
             'role_id' => $validated['role_id'],
         ]);
 
+        // Audit
+        \App\Models\Audit::create([
+            'user_id' => $request->user()->id,
+            'transaksi_id' => null,
+            'action' => 'user.create',
+            'meta' => ['created_user_id' => $user->id, 'role_id' => $user->role_id],
+        ]);
+
         return redirect()->back()->with('success', 'User berhasil dibuat.');
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $this->authorize('update', $user);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'role_id' => 'required|exists:roles,id',
+        ]);
+
+        $user->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role_id' => $validated['role_id'],
+        ]);
+
+        \App\Models\Audit::create([
+            'user_id' => $request->user()->id,
+            'transaksi_id' => null,
+            'action' => 'user.update',
+            'meta' => ['updated_user_id' => $user->id, 'role_id' => $user->role_id],
+        ]);
+
+        return redirect()->back()->with('success', 'User berhasil diupdate.');
+    }
+
+    public function destroy(Request $request, User $user)
+    {
+        $this->authorize('delete', $user);
+
+        $userId = $user->id;
+        $user->delete();
+
+        \App\Models\Audit::create([
+            'user_id' => $request->user()->id,
+            'transaksi_id' => null,
+            'action' => 'user.delete',
+            'meta' => ['deleted_user_id' => $userId],
+        ]);
+
+        return redirect()->back()->with('success', 'User berhasil dihapus.');
     }
 }

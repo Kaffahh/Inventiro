@@ -11,6 +11,8 @@ use App\Models\Barang;
 use App\Policies\GudangPolicy;
 use App\Policies\KategoriPolicy;
 use App\Policies\BarangPolicy;
+use App\Models\User;
+use App\Policies\UserPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -33,5 +35,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Gudang::class, GudangPolicy::class);
         Gate::policy(Kategori::class, KategoriPolicy::class);
         Gate::policy(Barang::class, BarangPolicy::class);
+        Gate::policy(User::class, UserPolicy::class);
     }
 }
