@@ -61,7 +61,7 @@ export default function Authenticated({
         { href: '#', icon: ArrowUpCircle, label: 'Stok Masuk', name: 'stok-masuk', roles: ['admin', 'staff'] },
         { href: '#', icon: ArrowDownCircle, label: 'Stok Keluar', name: 'stok-keluar', roles: ['admin', 'staff'] },
         { href: '#', icon: History, label: 'Riwayat', name: 'riwayat', roles: ['admin', 'staff'] },
-        { href: '#', icon: Users, label: 'Manajemen User', name: 'users', roles: ['admin'] },
+        { href: route('users.index'), icon: Users, label: 'Manajemen User', name: 'users.index', roles: ['admin'] },
     ];
 
     const filteredItems = sidebarItems.filter(item => item.roles.includes(user.role));
