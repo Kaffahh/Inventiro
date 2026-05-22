@@ -121,13 +121,20 @@ export default function GudangIndex() {
                                             <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{g.alamat || '-'}</td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="inline-flex items-center gap-2">
-                                                    <button onClick={() => openEdit(g)} className="text-blue-600 hover:underline inline-flex items-center gap-2">
-                                                        <Pencil size={14} />
-                                                        <span>Edit</span>
+                                                    <button
+                                                        onClick={() => openEdit(g)}
+                                                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
+                                                        aria-label={`Edit ${g.name}`}
+                                                    >
+                                                        <Pencil size={16} />
                                                     </button>
-                                                    <button onClick={() => openDelete(g)} className="text-red-600 hover:underline inline-flex items-center gap-2">
-                                                        <Trash2 size={14} />
-                                                        <span>Hapus</span>
+
+                                                    <button
+                                                        onClick={() => openDelete(g)}
+                                                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                                                        aria-label={`Hapus ${g.name}`}
+                                                    >
+                                                        <Trash2 size={16} />
                                                     </button>
                                                 </div>
                                             </td>
