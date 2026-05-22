@@ -84,6 +84,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('barang', BarangController::class);
     Route::resource('kategori', KategoriController::class);
     Route::resource('gudang', GudangController::class);
+    // Stock in/out
+    Route::get('stok', [App\Http\Controllers\StockController::class, 'index'])->name('stok.index');
+    Route::post('stok/masuk', [App\Http\Controllers\StockController::class, 'masuk'])->name('stok.masuk');
+    Route::post('stok/keluar', [App\Http\Controllers\StockController::class, 'keluar'])->name('stok.keluar');
 });
 
 require __DIR__.'/auth.php';
