@@ -14,12 +14,17 @@ Route::get('/', function () {
         'total_stok' => Barang::sum('stok'),
         'stok_menipis' => Barang::whereColumn('stok', '<=', 'min_stok')->count(),
         'total_transaksi' => Transaksi::count(),
-        'recent_transactions' => Transaksi::with(['user', 'gudang'])->latest()->take(5)->get()->map(function($tx) {
+        'recent_transactions' => Transaksi::with(['user', 'gudang', 'details.barang'])->latest()->take(5)->get()->map(function($tx) {
+            $barangNames = $tx->details
+                ->pluck('barang.name')
+                ->filter()
+                ->values();
+
             return [
                 'id' => 'TX-' . str_pad($tx->id, 3, '0', STR_PAD_LEFT),
-                'item' => 'Multiple Items', // Simplify for now
+                'item' => $barangNames->isNotEmpty() ? $barangNames->implode(', ') : '-',
                 'type' => ucfirst($tx->tipe),
-                'qty' => 0, // Would need detail sum
+                'qty' => $tx->details->sum('jumlah'),
                 'status' => ucfirst($tx->status),
                 'date' => Carbon::parse($tx->tgl_transaksi)->format('d M Y'),
             ];
