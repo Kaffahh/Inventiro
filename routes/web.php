@@ -85,6 +85,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('barang', BarangController::class);
     Route::resource('kategori', KategoriController::class);
     Route::resource('gudang', GudangController::class);
+    // User management (admin only)
+    Route::get('users', [UserManagementController::class, 'index'])->name('users.index');
+    Route::post('users', [UserManagementController::class, 'store'])->name('users.store');
 });
 
 require __DIR__.'/auth.php';
