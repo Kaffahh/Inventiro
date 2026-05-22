@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use App\Models\Audit;
+use App\Models\Gudang;
 
 class StockController extends Controller
 {
@@ -25,8 +26,13 @@ class StockController extends Controller
             ->paginate(15)
             ->withQueryString();
 
+        $gudangs = Gudang::all();
+        $barangs = Barang::latest()->paginate(50);
+
         return Inertia::render('Stock/Index', [
             'transaksis' => $transaksis,
+            'gudangs' => $gudangs,
+            'barangs' => $barangs,
             'filters' => ['q' => $q]
         ]);
     }
