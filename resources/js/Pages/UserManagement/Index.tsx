@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 export default function UserManagementIndex() {
     const { users = { data: [] }, roles = [] , auth } = usePage().props as any;
     const form = useForm({ name: '', email: '', password: '', role_id: '' });
-    const editForm = useForm({ id: '', name: '', email: '', role_id: '' });
+    const editForm = useForm({ id: '', name: '', email: '', role_id: '', password: '' });
     const [editing, setEditing] = useState<any>(null);
 
     const submit = (e: any) => {
@@ -17,7 +17,7 @@ export default function UserManagementIndex() {
 
     const openEdit = (u: any) => {
         setEditing(u.id);
-        editForm.setData({ id: u.id, name: u.name, email: u.email, role_id: u.role_id });
+        editForm.setData({ id: u.id, name: u.name, email: u.email, role_id: u.role_id, password: '' });
     };
 
     const submitEdit = (e: any) => {
@@ -79,6 +79,7 @@ export default function UserManagementIndex() {
                                     <option value="">Pilih role</option>
                                     {roles.map((r: any) => (<option key={r.id} value={r.id}>{r.name}</option>))}
                                 </select>
+                                <input placeholder="Kosongkan untuk tidak merubah password" type="password" className="w-full rounded-xl border px-4 py-2" value={editForm.data.password} onChange={e => editForm.setData('password', e.target.value)} />
                                 <div className="flex justify-end gap-2">
                                     <button type="button" onClick={() => setEditing(null)} className="px-4 py-2 rounded-xl border">Batal</button>
                                     <button type="submit" className="px-4 py-2 rounded-xl bg-emerald-600 text-white">Simpan</button>

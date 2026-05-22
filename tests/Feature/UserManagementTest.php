@@ -2,6 +2,8 @@
 
 use App\Models\Role;
 use App\Models\User;
+use App\Models\Audit;
+use Illuminate\Support\Facades\Hash;
 
 if (! function_exists('makeUserWithRoleUnique')) {
     function makeUserWithRoleUnique(string $slug): User
@@ -37,13 +39,35 @@ it('allows admin to create update and delete users', function () {
 
     $new = User::where('email', 'staff2@inventiro.test')->firstOrFail();
 
+    $this->assertDatabaseHas('audits', ['action' => 'user.create']);
+    $createAudit = Audit::where('action', 'user.create')->latest()->first();
+    expect($createAudit->meta['created_user_id'])->toBe($new->id);
+
     $this->actingAs($admin)->put(route('users.update', $new), [
         'name' => 'Staff Updated',
         'email' => $new->email,
         'role_id' => $role->id,
     ])->assertRedirect();
 
+    $this->assertDatabaseHas('audits', ['action' => 'user.update']);
+    $updateAudit = Audit::where('action', 'user.update')->latest()->first();
+    expect($updateAudit->meta['updated_user_id'])->toBe($new->id);
+
+    // also update password
+    $this->actingAs($admin)->put(route('users.update', $new), [
+        'name' => 'Staff Updated',
+        'email' => $new->email,
+        'role_id' => $role->id,
+        'password' => 'newsecurepass',
+    ])->assertRedirect();
+
+    $this->assertTrue(Hash::check('newsecurepass', $new->fresh()->password));
+
     $this->actingAs($admin)->delete(route('users.destroy', $new))->assertRedirect();
+
+    $this->assertDatabaseHas('audits', ['action' => 'user.delete']);
+    $deleteAudit = Audit::where('action', 'user.delete')->latest()->first();
+    expect($deleteAudit->meta['deleted_user_id'])->toBe($new->id);
 });
 
 it('forbids staff from managing users', function () {
