@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\BarangController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -79,10 +80,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('/barang', function () {
-        return Inertia::render('Barang/Index');
-    })->name('barang.index');
-
+    Route::resource('barang', BarangController::class);
     Route::resource('kategori', KategoriController::class);
 });
 
