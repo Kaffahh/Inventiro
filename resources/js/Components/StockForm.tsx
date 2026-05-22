@@ -19,6 +19,8 @@ export default function StockForm({ mode, gudangs, barangs }: Props) {
         stockForm.post(route(routeName));
     };
 
+    const filteredBarangs = stockForm.data.gudang_id ? barangs.filter(b => String(b.gudang_id) === String(stockForm.data.gudang_id)) : [];
+
     return (
         <div>
             {stockForm.errors && Object.keys(stockForm.errors).length > 0 && (
@@ -41,7 +43,11 @@ export default function StockForm({ mode, gudangs, barangs }: Props) {
                             const items = [...stockForm.data.items]; items[idx].barang_id = e.target.value; stockForm.setData('items', items);
                         }} required>
                             <option value="">Pilih Barang</option>
-                            {barangs.map((b: any) => (<option key={b.id} value={b.id}>{b.name}</option>))}
+                            {stockForm.data.gudang_id ? (
+                                filteredBarangs.map((b: any) => (<option key={b.id} value={b.id}>{b.name}</option>))
+                            ) : (
+                                <option value="">Pilih gudang terlebih dahulu</option>
+                            )}
                         </select>
                             <input type="number" min="1" className="rounded-xl bg-gray-50 dark:bg-gray-800 border-none text-sm focus:ring-2 focus:ring-emerald-500 dark:text-white px-3 py-2" value={row.jumlah} onChange={e => {
                             const items = [...stockForm.data.items]; items[idx].jumlah = e.target.value; stockForm.setData('items', items);

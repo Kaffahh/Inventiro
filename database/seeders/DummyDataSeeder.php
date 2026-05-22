@@ -40,12 +40,12 @@ class DummyDataSeeder extends Seeder
         $gudangUtama = Gudang::where('name', 'Gudang Utama')->first();
         $gudangDepok = Gudang::where('name', 'Gudang Cabang Depok')->first();
 
-        $barangs = [
+        // create sample products in each gudang so each gudang has its own barang rows
+        $baseProducts = [
             [
                 'name' => 'Laptop ASUS ROG',
                 'sku' => 'LAP-ROG-001',
                 'kategori_id' => $katElektronik->id,
-                'gudang_id' => $gudangUtama->id,
                 'stok' => 50,
                 'min_stok' => 10,
             ],
@@ -53,7 +53,6 @@ class DummyDataSeeder extends Seeder
                 'name' => 'Mouse Logitech G502',
                 'sku' => 'MOU-LOG-002',
                 'kategori_id' => $katAksesoris->id,
-                'gudang_id' => $gudangUtama->id,
                 'stok' => 100,
                 'min_stok' => 15,
             ],
@@ -61,35 +60,48 @@ class DummyDataSeeder extends Seeder
                 'name' => 'Monitor Dell 24"',
                 'sku' => 'MON-DEL-003',
                 'kategori_id' => $katElektronik->id,
-                'gudang_id' => $gudangDepok->id,
                 'stok' => 20,
                 'min_stok' => 5,
             ],
         ];
-        foreach ($barangs as $b) {
-            Barang::create($b);
+
+        $allGudangs = Gudang::all();
+        foreach ($allGudangs as $g) {
+            foreach ($baseProducts as $p) {
+                Barang::create([
+                    'name' => $p['name'] . ' (' . $g->name . ')',
+                    'sku' => $p['sku'] . '-' . $g->id,
+                    'kategori_id' => $p['kategori_id'],
+                    'gudang_id' => $g->id,
+                    'stok' => $p['stok'] + rand(-10, 20),
+                    'min_stok' => $p['min_stok'],
+                ]);
+            }
         }
 
         // 4. Seed Dummy Transactions for Statistics
         $admin = User::where('email', 'admin@inventiro.com')->first();
-        $allBarangs = Barang::all();
-
-        // Create transactions for the last 6 months
+        // Create transactions for the last 6 months — ensure details pick barang from the transaksi's gudang
+        $allGudangs = Gudang::all();
         for ($i = 0; $i < 60; $i++) {
             $tipe = rand(0, 1) ? 'masuk' : 'keluar';
             $tgl = Carbon::now()->subDays(rand(0, 180));
+            $g = $allGudangs->random();
 
             $transaksi = Transaksi::create([
                 'user_id' => $admin->id,
-                'gudang_id' => rand(0, 1) ? $gudangUtama->id : $gudangDepok->id,
+                'gudang_id' => $g->id,
                 'tipe' => $tipe,
                 'status' => 'approved',
                 'tgl_transaksi' => $tgl,
             ]);
 
+            $barangInGudang = Barang::where('gudang_id', $g->id)->get();
+            if ($barangInGudang->count() === 0) continue;
+
             TransaksiDetail::create([
                 'transaksi_id' => $transaksi->id,
-                'barang_id' => $allBarangs->random()->id,
+                'barang_id' => $barangInGudang->random()->id,
                 'jumlah' => rand(1, 20),
             ]);
         }
