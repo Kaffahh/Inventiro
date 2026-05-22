@@ -213,84 +213,87 @@ export default function Dashboard({ stats }: { stats: any }) {
                 {/* Recent Transactions Table */}
                 <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                     <div className="p-6 border-b border-gray-100 dark:border-gray-800 space-y-4">
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                             <div>
                                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">Transaksi Terbaru</h3>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                     {transactionsCountLabel} tampil dari {transactions.length} data
                                 </p>
                             </div>
-                            <div className="relative self-start lg:self-auto">
+
+                            <div className="flex flex-col sm:flex-row gap-3 sm:items-center w-full lg:w-auto lg:min-w-[520px]">
+                                <div className="relative flex-1">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                    <input
+                                        type="text"
+                                        value={searchTerm}
+                                        onChange={(event) => setSearchTerm(event.target.value)}
+                                        placeholder="Cari ID, barang, tipe, status, atau tanggal..."
+                                        className="w-full pl-10 pr-4 py-2.5 border-gray-200 dark:border-gray-800 rounded-lg dark:bg-gray-800 dark:text-white text-sm focus:ring-emerald-500 focus:border-emerald-500"
+                                    />
+                                </div>
+
                                 <button
                                     onClick={() => setShowFilterMenu((current) => !current)}
-                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-800 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-800 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shrink-0"
                                 >
                                     <Filter size={16} />
                                     Filter
                                 </button>
-
-                                {showFilterMenu && (
-                                    <div className="absolute right-0 top-12 z-30 w-[320px] rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl p-4 space-y-4">
-                                        <div>
-                                            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
-                                                Jenis Transaksi
-                                            </label>
-                                            <select
-                                                value={typeFilter}
-                                                onChange={(event) => setTypeFilter(event.target.value as TransactionTypeFilter)}
-                                                className="w-full px-4 py-2.5 border-gray-200 dark:border-gray-800 rounded-lg dark:bg-gray-800 dark:text-white text-sm focus:ring-emerald-500 focus:border-emerald-500"
-                                            >
-                                                <option value="Semua">Semua Jenis</option>
-                                                <option value="Masuk">Masuk</option>
-                                                <option value="Keluar">Keluar</option>
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
-                                                Status
-                                            </label>
-                                            <select
-                                                value={statusFilter}
-                                                onChange={(event) => setStatusFilter(event.target.value as TransactionStatusFilter)}
-                                                className="w-full px-4 py-2.5 border-gray-200 dark:border-gray-800 rounded-lg dark:bg-gray-800 dark:text-white text-sm focus:ring-emerald-500 focus:border-emerald-500"
-                                            >
-                                                <option value="Semua">Semua Status</option>
-                                                <option value="Approved">Approved</option>
-                                                <option value="Pending">Pending</option>
-                                                <option value="Rejected">Rejected</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="flex items-center gap-2 pt-1">
-                                            <button
-                                                onClick={resetFilters}
-                                                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-800 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                                            >
-                                                Reset
-                                            </button>
-                                            <button
-                                                onClick={() => setShowFilterMenu(false)}
-                                                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-colors"
-                                            >
-                                                Terapkan
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         </div>
 
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                            <input
-                                type="text"
-                                value={searchTerm}
-                                onChange={(event) => setSearchTerm(event.target.value)}
-                                placeholder="Cari ID, barang, tipe, status, atau tanggal..."
-                                className="w-full pl-10 pr-4 py-2.5 border-gray-200 dark:border-gray-800 rounded-lg dark:bg-gray-800 dark:text-white text-sm focus:ring-emerald-500 focus:border-emerald-500"
-                            />
-                        </div>
+                        {showFilterMenu && (
+                            <div className="ml-auto w-full lg:w-auto lg:min-w-[520px] rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40 p-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+                                            Jenis Transaksi
+                                        </label>
+                                        <select
+                                            value={typeFilter}
+                                            onChange={(event) => setTypeFilter(event.target.value as TransactionTypeFilter)}
+                                            className="w-full px-4 py-2.5 border-gray-200 dark:border-gray-800 rounded-lg dark:bg-gray-900 dark:text-white text-sm focus:ring-emerald-500 focus:border-emerald-500"
+                                        >
+                                            <option value="Semua">Semua Jenis</option>
+                                            <option value="Masuk">Masuk</option>
+                                            <option value="Keluar">Keluar</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+                                            Status
+                                        </label>
+                                        <select
+                                            value={statusFilter}
+                                            onChange={(event) => setStatusFilter(event.target.value as TransactionStatusFilter)}
+                                            className="w-full px-4 py-2.5 border-gray-200 dark:border-gray-800 rounded-lg dark:bg-gray-900 dark:text-white text-sm focus:ring-emerald-500 focus:border-emerald-500"
+                                        >
+                                            <option value="Semua">Semua Status</option>
+                                            <option value="Approved">Approved</option>
+                                            <option value="Pending">Pending</option>
+                                            <option value="Rejected">Rejected</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-end gap-2 pt-4">
+                                    <button
+                                        onClick={resetFilters}
+                                        className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-800 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-900 transition-colors"
+                                    >
+                                        Reset
+                                    </button>
+                                    <button
+                                        onClick={() => setShowFilterMenu(false)}
+                                        className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-colors"
+                                    >
+                                        Terapkan
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
