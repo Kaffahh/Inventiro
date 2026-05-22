@@ -65,6 +65,10 @@ class GudangController extends Controller
 
     public function destroy(Gudang $gudang): RedirectResponse
     {
+        if ($gudang->barangs()->exists()) {
+            return redirect()->route('gudang.index')->with('error', 'Gudang tidak dapat dihapus karena masih digunakan oleh data barang.');
+        }
+
         $gudang->delete();
 
         return redirect()->route('gudang.index')->with('success', 'Gudang berhasil dihapus.');
