@@ -79,7 +79,7 @@ export default function Authenticated({
                     <div className="h-20 flex items-center justify-between px-6 border-b border-gray-100 dark:border-gray-800 shrink-0">
                         <Link href="/" className="flex items-center gap-2">
                             <span className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
-                                Manajemen<span className="text-emerald-600">Barang</span>
+                                Inventiro
                             </span>
                         </Link>
                         <button
