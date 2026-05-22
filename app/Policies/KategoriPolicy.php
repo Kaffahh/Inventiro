@@ -3,16 +3,16 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Gudang;
+use App\Models\Kategori;
 
-class GudangPolicy
+class KategoriPolicy
 {
     public function viewAny(User $user): bool
     {
         return in_array($user->role?->slug, ['admin', 'staff']);
     }
 
-    public function view(User $user, Gudang $gudang): bool
+    public function view(User $user, Kategori $kategori): bool
     {
         return in_array($user->role?->slug, ['admin', 'staff']);
     }
@@ -22,12 +22,12 @@ class GudangPolicy
         return $user->role?->slug === 'admin';
     }
 
-    public function update(User $user, Gudang $gudang): bool
+    public function update(User $user, Kategori $kategori): bool
     {
         return $user->role?->slug === 'admin';
     }
 
-    public function delete(User $user, Gudang $gudang): bool
+    public function delete(User $user, Kategori $kategori): bool
     {
         return $user->role?->slug === 'admin';
     }

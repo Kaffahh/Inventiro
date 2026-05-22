@@ -77,6 +77,7 @@ export default function BarangIndex() {
     
     const [selectedBarang, setSelectedBarang] = useState<Barang | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [fileError, setFileError] = useState<string | null>(null);
 
     // Form for Adding
     const addForm = useForm({
@@ -135,6 +136,12 @@ export default function BarangIndex() {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => {
         const file = e.target.files?.[0] || null;
         if (file) {
+            // Client-side size guard: 2MB max (match server validation)
+            if (file.size > 2 * 1024 * 1024) {
+                setFileError('Ukuran gambar maksimal 2MB.');
+                return;
+            }
+            setFileError(null);
             if (isEdit) {
                 editForm.setData('foto', file);
             } else {
@@ -677,6 +684,9 @@ export default function BarangIndex() {
                                     {addForm.errors.foto && (
                                         <p className="text-xs font-semibold text-red-600">{addForm.errors.foto}</p>
                                     )}
+                                    {fileError && (
+                                        <p className="text-xs font-semibold text-red-600">{fileError}</p>
+                                    )}
                                 </div>
                             </div>
                             <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 flex justify-end gap-3 rounded-b-2xl">
@@ -868,6 +878,9 @@ export default function BarangIndex() {
                                     </div>
                                     {editForm.errors.foto && (
                                         <p className="text-xs font-semibold text-red-600">{editForm.errors.foto}</p>
+                                    )}
+                                    {fileError && (
+                                        <p className="text-xs font-semibold text-red-600">{fileError}</p>
                                     )}
                                 </div>
                             </div>

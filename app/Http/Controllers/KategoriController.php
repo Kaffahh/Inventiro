@@ -11,6 +11,10 @@ use Illuminate\Http\RedirectResponse;
 
 class KategoriController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Kategori::class, 'kategori');
+    }
     public function index(Request $request): Response
     {
         $search = $request->input('search');
