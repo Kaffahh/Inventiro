@@ -8,6 +8,7 @@ use App\Models\Barang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use App\Models\Audit;
 
 class StockController extends Controller
 {
@@ -34,9 +35,7 @@ class StockController extends Controller
     public function masuk(Request $request)
     {
         $user = $request->user();
-        if (! in_array($user->role?->slug, ['admin', 'staff'])) {
-            abort(403);
-        }
+        $this->authorize('create', Transaksi::class);
 
         $validated = $request->validate([
             'gudang_id' => 'required|exists:gudangs,id',
@@ -50,7 +49,7 @@ class StockController extends Controller
                 'user_id' => $user->id,
                 'gudang_id' => $validated['gudang_id'],
                 'tipe' => 'masuk',
-                'status' => 'completed',
+                'status' => 'approved',
                 'tgl_transaksi' => now(),
             ]);
 
@@ -67,6 +66,13 @@ class StockController extends Controller
                     'jumlah' => $jumlah,
                 ]);
             }
+            // Audit
+            Audit::create([
+                'user_id' => $user->id,
+                'transaksi_id' => $tx->id,
+                'action' => 'masuk',
+                'meta' => ['items' => $validated['items']],
+            ]);
         });
 
         return redirect()->back()->with('success', 'Stok masuk berhasil dicatat.');
@@ -76,9 +82,7 @@ class StockController extends Controller
     public function keluar(Request $request)
     {
         $user = $request->user();
-        if (! in_array($user->role?->slug, ['admin', 'staff'])) {
-            abort(403);
-        }
+        $this->authorize('create', Transaksi::class);
 
         $validated = $request->validate([
             'gudang_id' => 'required|exists:gudangs,id',
@@ -101,7 +105,7 @@ class StockController extends Controller
                 'user_id' => $user->id,
                 'gudang_id' => $validated['gudang_id'],
                 'tipe' => 'keluar',
-                'status' => 'completed',
+                'status' => 'approved',
                 'tgl_transaksi' => now(),
             ]);
 
@@ -118,6 +122,14 @@ class StockController extends Controller
                     'jumlah' => $jumlah,
                 ]);
             }
+
+            // Audit
+            Audit::create([
+                'user_id' => $user->id,
+                'transaksi_id' => $tx->id,
+                'action' => 'keluar',
+                'meta' => ['items' => $validated['items']],
+            ]);
 
             return ['ok' => true];
         });

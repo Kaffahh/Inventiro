@@ -8,9 +8,11 @@ use Illuminate\Support\Facades\Gate;
 use App\Models\Gudang;
 use App\Models\Kategori;
 use App\Models\Barang;
+use App\Models\Transaksi;
 use App\Policies\GudangPolicy;
 use App\Policies\KategoriPolicy;
 use App\Policies\BarangPolicy;
+use App\Policies\TransaksiPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -33,5 +35,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Gudang::class, GudangPolicy::class);
         Gate::policy(Kategori::class, KategoriPolicy::class);
         Gate::policy(Barang::class, BarangPolicy::class);
+        Gate::policy(Transaksi::class, TransaksiPolicy::class);
     }
 }
