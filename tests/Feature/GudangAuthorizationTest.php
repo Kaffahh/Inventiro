@@ -4,23 +4,25 @@ use App\Models\Gudang;
 use App\Models\Role;
 use App\Models\User;
 
-function makeUserWithRole(string $slug): User
-{
-    $role = Role::create([
-        'name' => ucfirst($slug) . ' Gudang',
-        'slug' => $slug,
-    ]);
+if (! function_exists('makeUserWithRoleGudang')) {
+    function makeUserWithRoleGudang(string $slug): User
+    {
+        $role = Role::create([
+            'name' => ucfirst($slug) . ' Gudang',
+            'slug' => $slug,
+        ]);
 
-    return User::factory()->create([
-        'name' => ucfirst($slug) . ' User',
-        'email' => $slug . '@inventiro.test',
-        'password' => bcrypt($slug),
-        'role_id' => $role->id,
-    ]);
+        return User::factory()->create([
+            'name' => ucfirst($slug) . ' User',
+            'email' => $slug . '@inventiro.test',
+            'password' => bcrypt($slug),
+            'role_id' => $role->id,
+        ]);
+    }
 }
 
 it('allows admin to manage gudang', function () {
-    $admin = makeUserWithRole('admin');
+    $admin = makeUserWithRoleGudang('admin');
     $gudang = Gudang::create([
         'name' => 'Gudang Utama',
         'alamat' => 'Jl. Test',

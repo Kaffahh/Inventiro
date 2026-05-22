@@ -3,8 +3,8 @@
 use App\Models\Role;
 use App\Models\User;
 
-if (! function_exists('makeUserWithRole')) {
-    function makeUserWithRole(string $slug): User
+if (! function_exists('makeUserWithRoleUnique')) {
+    function makeUserWithRoleUnique(string $slug): User
     {
         $role = Role::firstOrCreate([
             'slug' => $slug
@@ -22,7 +22,7 @@ if (! function_exists('makeUserWithRole')) {
 }
 
 it('allows admin to create update and delete users', function () {
-    $admin = makeUserWithRole('admin');
+    $admin = makeUserWithRoleUnique('admin');
 
     $this->actingAs($admin)->get(route('users.index'))->assertOk();
 
@@ -47,7 +47,7 @@ it('allows admin to create update and delete users', function () {
 });
 
 it('forbids staff from managing users', function () {
-    $staff = makeUserWithRole('staff');
+    $staff = makeUserWithRoleUnique('staff');
 
     $this->actingAs($staff)->get(route('users.index'))->assertForbidden();
 
