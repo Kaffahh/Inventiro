@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('audits', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->unsignedBigInteger('transaksi_id')->nullable();
+            $table->foreignId('transaksi_id')->nullable()->constrained('transaksis')->nullOnDelete();
             $table->string('action');
             $table->json('meta')->nullable();
             $table->timestamps();

@@ -5,6 +5,7 @@ use App\Http\Controllers\GudangController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\StockController;
 use App\Models\Barang;
 use App\Models\Transaksi;
 use Carbon\Carbon;
@@ -85,6 +86,14 @@ Route::middleware('auth')->group(function () {
     Route::resource('barang', BarangController::class);
     Route::resource('kategori', KategoriController::class);
     Route::resource('gudang', GudangController::class);
+
+    // Stock in/out
+    Route::get('stok', [StockController::class, 'index'])->name('stok.index');
+    Route::post('stok/masuk', [StockController::class, 'masuk'])->name('stok.masuk');
+    Route::post('stok/keluar', [StockController::class, 'keluar'])->name('stok.keluar');
+    Route::post('stok/{transaksi}/approve', [StockController::class, 'approve'])->name('stok.approve');
+    Route::post('stok/{transaksi}/reject', [StockController::class, 'reject'])->name('stok.reject');
+
     // User management (admin only)
     Route::get('users', [UserManagementController::class, 'index'])->name('users.index');
     Route::post('users', [UserManagementController::class, 'store'])->name('users.store');
