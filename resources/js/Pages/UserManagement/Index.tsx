@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, usePage, useForm, router } from '@inertiajs/react';
+import InputError from '@/Components/InputError';
 import React, { useState } from 'react';
 
 export default function UserManagementIndex() {
@@ -11,13 +12,14 @@ export default function UserManagementIndex() {
     const submit = (e: any) => {
         e.preventDefault();
         form.post(route('users.store'), {
-            onSuccess: () => form.reset()
+            onSuccess: () => form.reset(),
         });
-    }
+    };
 
     const openEdit = (u: any) => {
         setEditing(u.id);
         editForm.setData({ id: u.id, name: u.name, email: u.email, role_id: u.role_id, password: '' });
+        editForm.clearErrors();
     };
 
     const submitEdit = (e: any) => {
@@ -39,16 +41,30 @@ export default function UserManagementIndex() {
             <div className="space-y-6">
                 <form onSubmit={submit} className="bg-white p-6 rounded-2xl border">
                     <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                        <input placeholder="Nama" className="rounded-xl border px-4 py-2" value={form.data.name} onChange={e => form.setData('name', e.target.value)} />
-                        <input placeholder="Email" className="rounded-xl border px-4 py-2" value={form.data.email} onChange={e => form.setData('email', e.target.value)} />
-                        <input placeholder="Password" type="password" className="rounded-xl border px-4 py-2" value={form.data.password} onChange={e => form.setData('password', e.target.value)} />
-                        <select className="rounded-xl border px-4 py-2" value={form.data.role_id} onChange={e => form.setData('role_id', e.target.value)}>
-                            <option value="">Pilih role</option>
-                            {roles.map((r: any) => (<option key={r.id} value={r.id}>{r.name}</option>))}
-                        </select>
+                        <div>
+                            <input placeholder="Nama" className="w-full rounded-xl border px-4 py-2" value={form.data.name} onChange={e => form.setData('name', e.target.value)} />
+                            <InputError message={form.errors.name} className="mt-1" />
+                        </div>
+                        <div>
+                            <input placeholder="Email" className="w-full rounded-xl border px-4 py-2" value={form.data.email} onChange={e => form.setData('email', e.target.value)} />
+                            <InputError message={form.errors.email} className="mt-1" />
+                        </div>
+                        <div>
+                            <input placeholder="Password" type="password" className="w-full rounded-xl border px-4 py-2" value={form.data.password} onChange={e => form.setData('password', e.target.value)} />
+                            <InputError message={form.errors.password} className="mt-1" />
+                        </div>
+                        <div>
+                            <select className="w-full rounded-xl border px-4 py-2" value={form.data.role_id} onChange={e => form.setData('role_id', e.target.value)}>
+                                <option value="">Pilih role</option>
+                                {roles.map((r: any) => (<option key={r.id} value={r.id}>{r.name}</option>))}
+                            </select>
+                            <InputError message={form.errors.role_id} className="mt-1" />
+                        </div>
                     </div>
                     <div className="mt-4 flex justify-end">
-                        <button type="submit" className="px-4 py-2 rounded-xl bg-emerald-600 text-white">Buat User</button>
+                        <button type="submit" disabled={form.processing} className="px-4 py-2 rounded-xl bg-emerald-600 text-white disabled:opacity-60">
+                            {form.processing ? 'Menyimpan...' : 'Buat User'}
+                        </button>
                     </div>
                 </form>
 
@@ -73,16 +89,30 @@ export default function UserManagementIndex() {
                         <div className="bg-white p-6 rounded-2xl border z-10 w-full max-w-lg">
                             <h3 className="font-bold mb-4">Edit User</h3>
                             <form onSubmit={submitEdit} className="space-y-4">
-                                <input className="w-full rounded-xl border px-4 py-2" value={editForm.data.name} onChange={e => editForm.setData('name', e.target.value)} />
-                                <input className="w-full rounded-xl border px-4 py-2" value={editForm.data.email} onChange={e => editForm.setData('email', e.target.value)} />
-                                <select className="w-full rounded-xl border px-4 py-2" value={editForm.data.role_id} onChange={e => editForm.setData('role_id', e.target.value)}>
-                                    <option value="">Pilih role</option>
-                                    {roles.map((r: any) => (<option key={r.id} value={r.id}>{r.name}</option>))}
-                                </select>
-                                <input placeholder="Kosongkan untuk tidak merubah password" type="password" className="w-full rounded-xl border px-4 py-2" value={editForm.data.password} onChange={e => editForm.setData('password', e.target.value)} />
+                                <div>
+                                    <input className="w-full rounded-xl border px-4 py-2" value={editForm.data.name} onChange={e => editForm.setData('name', e.target.value)} />
+                                    <InputError message={editForm.errors.name} className="mt-1" />
+                                </div>
+                                <div>
+                                    <input className="w-full rounded-xl border px-4 py-2" value={editForm.data.email} onChange={e => editForm.setData('email', e.target.value)} />
+                                    <InputError message={editForm.errors.email} className="mt-1" />
+                                </div>
+                                <div>
+                                    <select className="w-full rounded-xl border px-4 py-2" value={editForm.data.role_id} onChange={e => editForm.setData('role_id', e.target.value)}>
+                                        <option value="">Pilih role</option>
+                                        {roles.map((r: any) => (<option key={r.id} value={r.id}>{r.name}</option>))}
+                                    </select>
+                                    <InputError message={editForm.errors.role_id} className="mt-1" />
+                                </div>
+                                <div>
+                                    <input placeholder="Kosongkan untuk tidak merubah password" type="password" className="w-full rounded-xl border px-4 py-2" value={editForm.data.password} onChange={e => editForm.setData('password', e.target.value)} />
+                                    <InputError message={editForm.errors.password} className="mt-1" />
+                                </div>
                                 <div className="flex justify-end gap-2">
                                     <button type="button" onClick={() => setEditing(null)} className="px-4 py-2 rounded-xl border">Batal</button>
-                                    <button type="submit" className="px-4 py-2 rounded-xl bg-emerald-600 text-white">Simpan</button>
+                                    <button type="submit" disabled={editForm.processing} className="px-4 py-2 rounded-xl bg-emerald-600 text-white disabled:opacity-60">
+                                        {editForm.processing ? 'Menyimpan...' : 'Simpan'}
+                                    </button>
                                 </div>
                             </form>
                         </div>
