@@ -10,6 +10,10 @@ use Illuminate\Http\RedirectResponse;
 
 class GudangController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Gudang::class, 'gudang');
+    }
     public function index(Request $request): Response
     {
         $search = $request->input('search');
