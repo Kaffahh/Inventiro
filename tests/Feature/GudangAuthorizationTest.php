@@ -52,7 +52,7 @@ it('allows admin to manage gudang', function () {
 });
 
 it('forbids staff from creating updating and deleting gudang', function () {
-    $staff = makeUserWithRole('staff');
+    $staff = makeUserWithRoleGudang('staff');
     $gudang = Gudang::create([
         'name' => 'Gudang Staff',
         'alamat' => 'Jl. Staff',
