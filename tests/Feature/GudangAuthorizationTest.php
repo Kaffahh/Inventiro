@@ -4,8 +4,8 @@ use App\Models\Gudang;
 use App\Models\Role;
 use App\Models\User;
 
-if (! function_exists('makeUserWithRole')) {
-    function makeUserWithRole(string $slug): User
+if (! function_exists('makeUserWithRoleGudang')) {
+    function makeUserWithRoleGudang(string $slug): User
     {
         $role = Role::create([
             'name' => ucfirst($slug) . ' Gudang',
@@ -22,7 +22,7 @@ if (! function_exists('makeUserWithRole')) {
 }
 
 it('allows admin to manage gudang', function () {
-    $admin = makeUserWithRole('admin');
+    $admin = makeUserWithRoleGudang('admin');
     $gudang = Gudang::create([
         'name' => 'Gudang Utama',
         'alamat' => 'Jl. Test',
@@ -52,7 +52,7 @@ it('allows admin to manage gudang', function () {
 });
 
 it('forbids staff from creating updating and deleting gudang', function () {
-    $staff = makeUserWithRole('staff');
+    $staff = makeUserWithRoleGudang('staff');
     $gudang = Gudang::create([
         'name' => 'Gudang Staff',
         'alamat' => 'Jl. Staff',
