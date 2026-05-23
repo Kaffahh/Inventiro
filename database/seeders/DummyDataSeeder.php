@@ -81,29 +81,51 @@ class DummyDataSeeder extends Seeder
 
         // 4. Seed Dummy Transactions for Statistics
         $admin = User::where('email', 'admin@inventiro.com')->first();
-        // Create transactions for the last 6 months — ensure details pick barang from the transaksi's gudang
         $allGudangs = Gudang::all();
-        for ($i = 0; $i < 60; $i++) {
-            $tipe = rand(0, 1) ? 'masuk' : 'keluar';
-            $tgl = Carbon::now()->subDays(rand(0, 180));
-            $g = $allGudangs->random();
 
-            $transaksi = Transaksi::create([
-                'user_id' => $admin->id,
-                'gudang_id' => $g->id,
-                'tipe' => $tipe,
-                'status' => 'approved',
-                'tgl_transaksi' => $tgl,
-            ]);
-
-            $barangInGudang = Barang::where('gudang_id', $g->id)->get();
-            if ($barangInGudang->count() === 0) continue;
-
-            TransaksiDetail::create([
-                'transaksi_id' => $transaksi->id,
-                'barang_id' => $barangInGudang->random()->id,
-                'jumlah' => rand(1, 20),
-            ]);
+        // Make the last 7 days intentionally uneven so the dashboard chart is easy to see.
+        $recentDailyPattern = [3, 8, 2, 9, 4, 10, 5];
+        foreach ($recentDailyPattern as $daysAgo => $totalTransactions) {
+            for ($i = 0; $i < $totalTransactions; $i++) {
+                $this->createDummyTransaction(
+                    admin: $admin,
+                    gudang: $allGudangs->random(),
+                    tanggal: Carbon::now()->subDays(6 - $daysAgo)->setTime(rand(8, 17), rand(0, 59), rand(0, 59)),
+                );
+            }
         }
+
+        // Keep a smaller batch of older data so the app still feels populated overall.
+        for ($i = 0; $i < 20; $i++) {
+            $this->createDummyTransaction(
+                admin: $admin,
+                gudang: $allGudangs->random(),
+                tanggal: Carbon::now()->subDays(rand(8, 180))->setTime(rand(8, 17), rand(0, 59), rand(0, 59)),
+            );
+        }
+    }
+
+    private function createDummyTransaction(User $admin, Gudang $gudang, Carbon $tanggal): void
+    {
+        $tipe = rand(0, 1) ? 'masuk' : 'keluar';
+
+        $transaksi = Transaksi::create([
+            'user_id' => $admin->id,
+            'gudang_id' => $gudang->id,
+            'tipe' => $tipe,
+            'status' => 'approved',
+            'tgl_transaksi' => $tanggal,
+        ]);
+
+        $barangInGudang = Barang::where('gudang_id', $gudang->id)->get();
+        if ($barangInGudang->count() === 0) {
+            return;
+        }
+
+        TransaksiDetail::create([
+            'transaksi_id' => $transaksi->id,
+            'barang_id' => $barangInGudang->random()->id,
+            'jumlah' => rand(1, 20),
+        ]);
     }
 }
