@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import StatCard from '@/Components/Molecules/StatCard';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import {
     Package,
@@ -14,7 +14,9 @@ import {
     Filter,
     CheckCircle2,
     Clock,
-    XCircle
+    XCircle,
+    Check,
+    CircleX,
 } from 'lucide-react';
 
 type ChartPoint = {
@@ -23,6 +25,7 @@ type ChartPoint = {
 };
 
 type DashboardTransaction = {
+    raw_id: number;
     id: string;
     item: string;
     type: string;
@@ -38,6 +41,7 @@ type TransactionStatusFilter = 'Semua' | 'Approved' | 'Pending' | 'Rejected';
 export default function Dashboard({ stats }: { stats: any }) {
     const { auth } = usePage().props as any;
     const user = auth.user;
+    const canManageTransactions = user.role === 'admin';
     const [searchTerm, setSearchTerm] = useState('');
     const [typeFilter, setTypeFilter] = useState<TransactionTypeFilter>('Semua');
     const [statusFilter, setStatusFilter] = useState<TransactionStatusFilter>('Semua');
@@ -80,13 +84,32 @@ export default function Dashboard({ stats }: { stats: any }) {
         });
     }, [transactions, searchTerm, typeFilter, statusFilter]);
 
-    const updateTransactionStatus = (transactionId: string, status: DashboardTransaction['status']) => {
-        setTransactions((currentTransactions) =>
-            currentTransactions.map((transaction) =>
-                transaction.id === transactionId ? { ...transaction, status } : transaction,
-            ),
-        );
-        setActiveActionId(null);
+    const approveTransaction = (transaction: DashboardTransaction) => {
+        router.post(route('stok.approve', transaction.raw_id), undefined, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setTransactions((currentTransactions) =>
+                    currentTransactions.map((item) =>
+                        item.raw_id === transaction.raw_id ? { ...item, status: 'Approved' } : item,
+                    ),
+                );
+                setActiveActionId(null);
+            },
+        });
+    };
+
+    const rejectTransaction = (transaction: DashboardTransaction) => {
+        router.post(route('stok.reject', transaction.raw_id), undefined, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setTransactions((currentTransactions) =>
+                    currentTransactions.map((item) =>
+                        item.raw_id === transaction.raw_id ? { ...item, status: 'Rejected' } : item,
+                    ),
+                );
+                setActiveActionId(null);
+            },
+        });
     };
 
     const handleCopyTransactionId = async (transactionId: string) => {
@@ -441,7 +464,7 @@ export default function Dashboard({ stats }: { stats: any }) {
                                     <th className="px-6 py-4 font-semibold">Jumlah</th>
                                     <th className="px-6 py-4 font-semibold">Status</th>
                                     <th className="px-6 py-4 font-semibold">Tanggal</th>
-                                    <th className="px-6 py-4 font-semibold text-center">Aksi</th>
+                                    {canManageTransactions && <th className="px-6 py-4 font-semibold text-center">Aksi</th>}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -468,49 +491,55 @@ export default function Dashboard({ stats }: { stats: any }) {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{tx.date}</td>
-                                            <td className="px-6 py-4 text-center relative">
-                                                <button
-                                                    onClick={() => setActiveActionId(activeActionId === tx.id ? null : tx.id)}
-                                                    className="inline-flex items-center justify-center h-9 w-9 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                                                >
-                                                    <MoreHorizontal size={18} />
-                                                </button>
+                                            {canManageTransactions && (
+                                                <td className="px-6 py-4 text-center relative">
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        {tx.status === 'Pending' ? (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => approveTransaction(tx)}
+                                                                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-500 transition-colors"
+                                                                >
+                                                                    <Check size={14} />
+                                                                    Approve
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => rejectTransaction(tx)}
+                                                                    className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-500 transition-colors"
+                                                                >
+                                                                    <CircleX size={14} />
+                                                                    Reject
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <span className="text-xs text-gray-400 dark:text-gray-500">-</span>
+                                                        )}
 
-                                                {activeActionId === tx.id && (
-                                                    <div className="absolute right-6 top-12 z-20 w-52 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-lg p-2 text-left">
                                                         <button
-                                                            onClick={() => handleCopyTransactionId(tx.id)}
-                                                            className="w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg text-left"
+                                                            onClick={() => setActiveActionId(activeActionId === tx.id ? null : tx.id)}
+                                                            className="inline-flex items-center justify-center h-9 w-9 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                                                         >
-                                                            Salin ID transaksi
-                                                        </button>
-                                                        <div className="my-1 border-t border-gray-100 dark:border-gray-800" />
-                                                        <button
-                                                            onClick={() => updateTransactionStatus(tx.id, 'Approved')}
-                                                            className="w-full px-3 py-2 text-sm text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg text-left"
-                                                        >
-                                                            Tandai Approved
-                                                        </button>
-                                                        <button
-                                                            onClick={() => updateTransactionStatus(tx.id, 'Pending')}
-                                                            className="w-full px-3 py-2 text-sm text-yellow-700 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg text-left"
-                                                        >
-                                                            Tandai Pending
-                                                        </button>
-                                                        <button
-                                                            onClick={() => updateTransactionStatus(tx.id, 'Rejected')}
-                                                            className="w-full px-3 py-2 text-sm text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-left"
-                                                        >
-                                                            Tandai Rejected
+                                                            <MoreHorizontal size={18} />
                                                         </button>
                                                     </div>
-                                                )}
-                                            </td>
+
+                                                    {activeActionId === tx.id && (
+                                                        <div className="absolute right-6 top-12 z-20 w-52 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-lg p-2 text-left">
+                                                            <button
+                                                                onClick={() => handleCopyTransactionId(tx.id)}
+                                                                className="w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg text-left"
+                                                            >
+                                                                Salin ID transaksi
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </td>
+                                            )}
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={7} className="px-6 py-12 text-center">
+                                        <td colSpan={canManageTransactions ? 7 : 6} className="px-6 py-12 text-center">
                                             <div className="mx-auto max-w-sm">
                                                 <p className="text-sm font-semibold text-gray-900 dark:text-white">Tidak ada transaksi yang cocok</p>
                                                 <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">

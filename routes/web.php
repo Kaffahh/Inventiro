@@ -14,6 +14,10 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
+    $user = request()->user();
+    $isStaff = $user?->role?->slug === 'staff';
+    $assignedGudangId = $user?->gudang_id;
+
     // Generate last 7 days list with default count 0
     $chartData = collect(range(6, 0))->mapWithKeys(function ($daysAgo) {
         $date = Carbon::now()->subDays($daysAgo)->format('Y-m-d');
@@ -23,6 +27,9 @@ Route::get('/', function () {
 
     // Fetch actual transaction count for last 7 days
     $dbChartData = Transaksi::selectRaw('DATE(tgl_transaksi) as date, COUNT(*) as count')
+        ->when($isStaff && $assignedGudangId, function ($query) use ($assignedGudangId) {
+            $query->where('gudang_id', $assignedGudangId);
+        })
         ->where('tgl_transaksi', '>=', Carbon::now()->subDays(6)->startOfDay())
         ->groupBy('date')
         ->get();
@@ -40,18 +47,35 @@ Route::get('/', function () {
         ];
     })->values()->all();
 
+    $recentTransactionsQuery = Transaksi::with(['user', 'gudang', 'details.barang'])->latest();
+    $lowStockQuery = Barang::query();
+
+    if ($isStaff && $assignedGudangId) {
+        $recentTransactionsQuery->where('gudang_id', $assignedGudangId);
+        $lowStockQuery->where('gudang_id', $assignedGudangId);
+    }
+
     $stats = [
-        'total_barang' => Barang::count(),
-        'total_stok' => Barang::sum('stok'),
-        'stok_menipis' => Barang::whereColumn('stok', '<=', 'min_stok')->count(),
-        'total_transaksi' => Transaksi::count(),
-        'recent_transactions' => Transaksi::with(['user', 'gudang', 'details.barang'])->latest()->take(5)->get()->map(function ($tx) {
+        'total_barang' => $isStaff && $assignedGudangId
+            ? Barang::where('gudang_id', $assignedGudangId)->count()
+            : Barang::count(),
+        'total_stok' => $isStaff && $assignedGudangId
+            ? Barang::where('gudang_id', $assignedGudangId)->sum('stok')
+            : Barang::sum('stok'),
+        'stok_menipis' => $isStaff && $assignedGudangId
+            ? Barang::where('gudang_id', $assignedGudangId)->whereColumn('stok', '<=', 'min_stok')->count()
+            : Barang::whereColumn('stok', '<=', 'min_stok')->count(),
+        'total_transaksi' => $isStaff && $assignedGudangId
+            ? Transaksi::where('gudang_id', $assignedGudangId)->count()
+            : Transaksi::count(),
+        'recent_transactions' => $recentTransactionsQuery->take(5)->get()->map(function ($tx) {
             $barangNames = $tx->details
                 ->pluck('barang.name')
                 ->filter()
                 ->values();
 
             return [
+                'raw_id' => $tx->id,
                 'id' => 'TX-'.str_pad($tx->id, 3, '0', STR_PAD_LEFT),
                 'item' => $barangNames->isNotEmpty() ? $barangNames->implode(', ') : '-',
                 'type' => ucfirst($tx->tipe),
@@ -60,7 +84,8 @@ Route::get('/', function () {
                 'date' => Carbon::parse($tx->tgl_transaksi)->format('d M Y'),
             ];
         }),
-        'low_stock_items' => Barang::whereColumn('stok', '<=', 'min_stok')
+        'low_stock_items' => $lowStockQuery
+            ->whereColumn('stok', '<=', 'min_stok')
             ->latest()
             ->take(3)
             ->get()
