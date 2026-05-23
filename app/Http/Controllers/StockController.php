@@ -17,8 +17,14 @@ class StockController extends Controller
     public function index(Request $request)
     {
         $q = $request->input('q');
+        $user = $request->user();
+        $isStaff = $user?->role?->slug === 'staff';
+        $assignedGudangId = $user?->gudang_id;
 
         $transaksis = Transaksi::with(['user', 'gudang', 'details.barang'])
+            ->when($isStaff && $assignedGudangId, function ($query) use ($assignedGudangId) {
+                $query->where('gudang_id', $assignedGudangId);
+            })
             ->when($q, function ($query, $q) {
                 $query->where('tipe', 'like', "%{$q}%");
             })
@@ -26,16 +32,23 @@ class StockController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        $gudangs = Gudang::all();
-        $barangs = Barang::latest()->paginate(50);
+        $gudangs = $isStaff && $assignedGudangId
+            ? Gudang::where('id', $assignedGudangId)->get()
+            : Gudang::all();
 
-        $user = $request->user();
+        $barangsQuery = Barang::latest();
+        if ($isStaff && $assignedGudangId) {
+            $barangsQuery->where('gudang_id', $assignedGudangId);
+        }
+
+        $barangs = $barangsQuery->paginate(50);
 
         return Inertia::render('Stock/Index', [
             'transaksis' => $transaksis,
             'gudangs' => $gudangs,
             'barangs' => $barangs,
             'filters' => ['q' => $q],
+            'assignedGudangId' => $assignedGudangId,
             // server-provided permission flags to avoid relying on client-side role checks
             'canCreateTransaksi' => $user ? $user->can('create', Transaksi::class) : false,
             // some policies expect a Transaksi instance; creating a fresh instance for ability check is fine
@@ -83,12 +96,20 @@ class StockController extends Controller
         $user = $request->user();
         $this->authorize('create', Transaksi::class);
 
+        if ($user?->role?->slug === 'staff' && ! $user?->gudang_id) {
+            return redirect()->back()->with('error', 'Akun staff belum memiliki gudang penugasan.');
+        }
+
         $validated = $request->validate([
             'gudang_id' => 'required|exists:gudangs,id',
             'items' => 'required|array|min:1',
             'items.*.barang_id' => 'required|exists:barangs,id',
             'items.*.jumlah' => 'required|integer|min:1',
         ]);
+
+        if ($user?->role?->slug === 'staff' && (string) $validated['gudang_id'] !== (string) $user->gudang_id) {
+            return redirect()->back()->with('error', 'Staff hanya boleh mencatat stok untuk gudang penugasannya.');
+        }
 
         DB::transaction(function () use ($validated, $user) {
             $tx = Transaksi::create([
@@ -137,12 +158,20 @@ class StockController extends Controller
         $user = $request->user();
         $this->authorize('create', Transaksi::class);
 
+        if ($user?->role?->slug === 'staff' && ! $user?->gudang_id) {
+            return redirect()->back()->with('error', 'Akun staff belum memiliki gudang penugasan.');
+        }
+
         $validated = $request->validate([
             'gudang_id' => 'required|exists:gudangs,id',
             'items' => 'required|array|min:1',
             'items.*.barang_id' => 'required|exists:barangs,id',
             'items.*.jumlah' => 'required|integer|min:1',
         ]);
+
+        if ($user?->role?->slug === 'staff' && (string) $validated['gudang_id'] !== (string) $user->gudang_id) {
+            return redirect()->back()->with('error', 'Staff hanya boleh mencatat stok untuk gudang penugasannya.');
+        }
 
         $result = DB::transaction(function () use ($validated, $user) {
             // First validate stock availability under lock

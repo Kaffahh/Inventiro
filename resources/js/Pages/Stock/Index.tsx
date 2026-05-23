@@ -6,7 +6,7 @@ import { Search, X, Check, XCircle } from 'lucide-react';
 import StockForm from '@/Components/StockForm';
 
 export default function StockIndex() {
-    const { gudangs = [], barangs = { data: [] }, transaksis = { data: [], total: 0, from: 0, to: 0 }, filters = { q: '' }, flash = { success: null, error: null }, auth, canApprove = false, canCreateTransaksi = false } = usePage().props as any;
+    const { gudangs = [], barangs = { data: [] }, transaksis = { data: [], total: 0, from: 0, to: 0 }, filters = { q: '' }, flash = { success: null, error: null }, auth, canApprove = false, canCreateTransaksi = false, assignedGudangId = null } = usePage().props as any;
     const user = auth.user;
     const [searchTerm, setSearchTerm] = useState(filters.q || '');
 
@@ -73,7 +73,13 @@ export default function StockIndex() {
                 <div className="space-y-6">
                     <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
                         <h3 className="text-lg font-bold mb-4">{activeTab === 'masuk' ? 'Catat Stok Masuk' : 'Catat Stok Keluar'}</h3>
-                        <StockForm mode={activeTab} gudangs={gudangs} barangs={barangs.data} />
+                        <StockForm
+                            mode={activeTab}
+                            gudangs={gudangs}
+                            barangs={barangs.data}
+                            defaultGudangId={assignedGudangId ?? user?.gudang_id ?? ''}
+                            lockGudang={user?.role?.slug === 'staff'}
+                        />
                     </div>
 
                     <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
