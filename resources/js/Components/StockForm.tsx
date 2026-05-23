@@ -5,10 +5,12 @@ interface Props {
     mode: 'masuk' | 'keluar';
     gudangs: any[];
     barangs: any[];
+    defaultGudangId?: string | number | null;
+    lockGudang?: boolean;
 }
 
-export default function StockForm({ mode, gudangs, barangs }: Props) {
-    const stockForm = useForm({ gudang_id: '', items: [{ barang_id: '', jumlah: '1' }] });
+export default function StockForm({ mode, gudangs, barangs, defaultGudangId = '', lockGudang = false }: Props) {
+    const stockForm = useForm({ gudang_id: defaultGudangId ? String(defaultGudangId) : '', items: [{ barang_id: '', jumlah: '1' }] });
 
     const addStockRow = () => stockForm.setData('items', [...stockForm.data.items, { barang_id: '', jumlah: '1' }]);
     const removeStockRow = (idx: number) => stockForm.setData('items', stockForm.data.items.filter((_: any, i: number) => i !== idx));
@@ -19,6 +21,8 @@ export default function StockForm({ mode, gudangs, barangs }: Props) {
         stockForm.post(route(routeName));
     };
 
+    const filteredBarangs = stockForm.data.gudang_id ? barangs.filter(b => String(b.gudang_id) === String(stockForm.data.gudang_id)) : [];
+
     return (
         <div>
             {stockForm.errors && Object.keys(stockForm.errors).length > 0 && (
@@ -28,7 +32,13 @@ export default function StockForm({ mode, gudangs, barangs }: Props) {
             <form onSubmit={submit} className="space-y-4">
                 <div>
                     <label className="text-sm font-semibold">Pilih Gudang</label>
-                    <select className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 dark:text-white px-4 py-2" value={stockForm.data.gudang_id} onChange={e => stockForm.setData('gudang_id', e.target.value)} required>
+                    <select
+                        className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 dark:text-white px-4 py-2"
+                        value={stockForm.data.gudang_id}
+                        onChange={e => stockForm.setData('gudang_id', e.target.value)}
+                        required
+                        disabled={lockGudang}
+                    >
                         <option value="">Pilih Gudang</option>
                         {gudangs.map(g => (<option key={g.id} value={g.id}>{g.name}</option>))}
                     </select>
@@ -41,7 +51,11 @@ export default function StockForm({ mode, gudangs, barangs }: Props) {
                             const items = [...stockForm.data.items]; items[idx].barang_id = e.target.value; stockForm.setData('items', items);
                         }} required>
                             <option value="">Pilih Barang</option>
-                            {barangs.map((b: any) => (<option key={b.id} value={b.id}>{b.name}</option>))}
+                            {stockForm.data.gudang_id ? (
+                                filteredBarangs.map((b: any) => (<option key={b.id} value={b.id}>{b.name}</option>))
+                            ) : (
+                                <option value="">Pilih gudang terlebih dahulu</option>
+                            )}
                         </select>
                             <input type="number" min="1" className="rounded-xl bg-gray-50 dark:bg-gray-800 border-none text-sm focus:ring-2 focus:ring-emerald-500 dark:text-white px-3 py-2" value={row.jumlah} onChange={e => {
                             const items = [...stockForm.data.items]; items[idx].jumlah = e.target.value; stockForm.setData('items', items);

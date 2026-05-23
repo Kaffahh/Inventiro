@@ -14,12 +14,14 @@ class UserManagementController extends Controller
     {
         $this->authorize('viewAny', User::class);
 
-        $users = User::with('role')->latest()->paginate(20)->withQueryString();
+        $users = User::with(['role','gudang'])->latest()->paginate(20)->withQueryString();
         $roles = Role::all();
+        $gudangs = \App\Models\Gudang::all();
 
         return Inertia::render('UserManagement/Index', [
             'users' => $users,
             'roles' => $roles,
+            'gudangs' => $gudangs,
         ]);
     }
 
@@ -32,13 +34,22 @@ class UserManagementController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
             'role_id' => 'required|exists:roles,id',
+            'gudang_id' => 'nullable|exists:gudangs,id',
         ]);
+
+        // If assigned role is staff, require gudang assignment
+        $role = Role::find($validated['role_id']);
+        // require gudang assignment only when there are gudangs in the system
+        if ($role && $role->slug === 'staff' && \App\Models\Gudang::count() > 0 && empty($validated['gudang_id'])) {
+            return redirect()->back()->withErrors(['gudang_id' => 'Pilih gudang untuk staff.'])->withInput();
+        }
 
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => bcrypt($validated['password']),
             'role_id' => $validated['role_id'],
+            'gudang_id' => $validated['gudang_id'] ?? null,
         ]);
 
         // Audit
@@ -61,12 +72,19 @@ class UserManagementController extends Controller
             'email' => 'required|email|unique:users,email,'.$user->id,
             'role_id' => 'required|exists:roles,id',
             'password' => 'nullable|string|min:8',
+            'gudang_id' => 'nullable|exists:gudangs,id',
         ]);
+
+        $role = Role::find($validated['role_id']);
+        if ($role && $role->slug === 'staff' && \App\Models\Gudang::count() > 0 && empty($validated['gudang_id'])) {
+            return redirect()->back()->withErrors(['gudang_id' => 'Pilih gudang untuk staff.'])->withInput();
+        }
 
         $data = [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'role_id' => $validated['role_id'],
+            'gudang_id' => $validated['gudang_id'] ?? null,
         ];
 
         if (! empty($validated['password'])) {

@@ -27,8 +27,12 @@ class BarangController extends Controller
         $kategoriId = $request->input('kategori_id');
         $stokStatus = $request->input('stok_status'); // 'menipis', 'tersedia'
         $sortStok = $request->input('sort_stok'); // 'asc', 'desc'
+        $user = $request->user();
 
         $barangs = Barang::with(['kategori', 'gudang'])
+            ->when($user?->role?->slug === 'staff', function ($query) use ($user) {
+                $query->where('gudang_id', $user->gudang_id);
+            })
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
@@ -56,7 +60,9 @@ class BarangController extends Controller
         return Inertia::render('Barang/Index', [
             'barangs' => $barangs,
             'kategoris' => Kategori::orderBy('name')->get(),
-            'gudangs' => Gudang::orderBy('name')->get(),
+            'gudangs' => $user?->role?->slug === 'staff'
+                ? Gudang::where('id', $user->gudang_id)->orderBy('name')->get()
+                : Gudang::orderBy('name')->get(),
             'filters' => [
                 'search' => $search,
                 'kategori_id' => $kategoriId,

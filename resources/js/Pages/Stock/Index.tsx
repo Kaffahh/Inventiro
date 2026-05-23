@@ -6,7 +6,7 @@ import { Search, X, Check, XCircle } from 'lucide-react';
 import StockForm from '@/Components/StockForm';
 
 export default function StockIndex() {
-    const { gudangs = [], barangs = { data: [] }, transaksis = { data: [], total: 0, from: 0, to: 0 }, filters = { q: '' }, flash = { success: null, error: null }, auth, canApprove = false, canCreateTransaksi = false } = usePage().props as any;
+    const { gudangs = [], barangs = { data: [] }, transaksis = { data: [], total: 0, from: 0, to: 0 }, filters = { q: '' }, flash = { success: null, error: null }, auth, canApprove = false, canCreateTransaksi = false, assignedGudangId = null } = usePage().props as any;
     const user = auth.user;
     const [searchTerm, setSearchTerm] = useState(filters.q || '');
 
@@ -73,7 +73,13 @@ export default function StockIndex() {
                 <div className="space-y-6">
                     <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
                         <h3 className="text-lg font-bold mb-4">{activeTab === 'masuk' ? 'Catat Stok Masuk' : 'Catat Stok Keluar'}</h3>
-                        <StockForm mode={activeTab} gudangs={gudangs} barangs={barangs.data} />
+                        <StockForm
+                            mode={activeTab}
+                            gudangs={gudangs}
+                            barangs={barangs.data}
+                            defaultGudangId={assignedGudangId ?? user?.gudang_id ?? ''}
+                            lockGudang={user?.role?.slug === 'staff'}
+                        />
                     </div>
 
                     <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
@@ -104,7 +110,7 @@ export default function StockIndex() {
                                                 <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{tx.tgl_transaksi}</td>
                                                 <td className="px-6 py-4 text-right">
                                                     <div className="inline-flex items-center gap-2">
-                                                        {canApprove && tx.status === 'pending' && (
+                                                        {canApprove && auth.user?.role?.slug === 'admin' && tx.status === 'pending' && (
                                                             <>
                                                                 <button onClick={() => { if (confirm('Approve transaksi ini?')) router.post(route('stok.approve', tx.id)); }} className="p-2 text-green-600 hover:bg-green-50 rounded-lg">
                                                                     <Check size={16} />

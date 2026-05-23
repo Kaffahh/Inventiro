@@ -15,34 +15,41 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Seed Roles
-        $adminRole = Role::create([
-            'name' => 'Admin Gudang',
+        $adminRole = Role::firstOrCreate([
             'slug' => 'admin',
+        ], [
+            'name' => 'Admin Gudang',
         ]);
 
-        $staffRole = Role::create([
-            'name' => 'Staff Gudang',
+        $staffRole = Role::firstOrCreate([
             'slug' => 'staff',
+        ], [
+            'name' => 'Staff Gudang',
         ]);
-
-        // Seed Admin User
-        User::create([
-            'name' => 'Admin User',
+        // Ensure admin user exists before seeding dummy transactions
+        User::firstOrCreate([
             'email' => 'admin@inventiro.com',
+        ], [
+            'name' => 'Admin User',
             'password' => Hash::make('admin'),
             'role_id' => $adminRole->id,
         ]);
 
-        // Seed Staff User
-        User::create([
-            'name' => 'Staff User',
-            'email' => 'staff@inventiro.com',
-            'password' => Hash::make('staff'),
-            'role_id' => $staffRole->id,
-        ]);
-
+        // Seed initial dummy data (kategoris, gudangs, barangs, transaksi)
         $this->call([
             DummyDataSeeder::class,
+        ]);
+
+        $firstGudang = \App\Models\Gudang::first();
+
+        // Seed Staff User and assign to first gudang when available
+        User::firstOrCreate([
+            'email' => 'staff@inventiro.com',
+        ], [
+            'name' => 'Staff User',
+            'password' => Hash::make('staff'),
+            'role_id' => $staffRole->id,
+            'gudang_id' => $firstGudang? $firstGudang->id : null,
         ]);
     }
 }

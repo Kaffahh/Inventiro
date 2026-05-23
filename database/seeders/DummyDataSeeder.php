@@ -40,12 +40,12 @@ class DummyDataSeeder extends Seeder
         $gudangUtama = Gudang::where('name', 'Gudang Utama')->first();
         $gudangDepok = Gudang::where('name', 'Gudang Cabang Depok')->first();
 
-        $barangs = [
+        // create sample products in each gudang so each gudang has its own barang rows
+        $baseProducts = [
             [
                 'name' => 'Laptop ASUS ROG',
                 'sku' => 'LAP-ROG-001',
                 'kategori_id' => $katElektronik->id,
-                'gudang_id' => $gudangUtama->id,
                 'stok' => 50,
                 'min_stok' => 10,
             ],
@@ -53,7 +53,6 @@ class DummyDataSeeder extends Seeder
                 'name' => 'Mouse Logitech G502',
                 'sku' => 'MOU-LOG-002',
                 'kategori_id' => $katAksesoris->id,
-                'gudang_id' => $gudangUtama->id,
                 'stok' => 100,
                 'min_stok' => 15,
             ],
@@ -61,37 +60,72 @@ class DummyDataSeeder extends Seeder
                 'name' => 'Monitor Dell 24"',
                 'sku' => 'MON-DEL-003',
                 'kategori_id' => $katElektronik->id,
-                'gudang_id' => $gudangDepok->id,
                 'stok' => 20,
                 'min_stok' => 5,
             ],
         ];
-        foreach ($barangs as $b) {
-            Barang::create($b);
+
+        $allGudangs = Gudang::all();
+        foreach ($allGudangs as $g) {
+            foreach ($baseProducts as $p) {
+                Barang::create([
+                    'name' => $p['name'] . ' (' . $g->name . ')',
+                    'sku' => $p['sku'] . '-' . $g->id,
+                    'kategori_id' => $p['kategori_id'],
+                    'gudang_id' => $g->id,
+                    'stok' => $p['stok'] + rand(-10, 20),
+                    'min_stok' => $p['min_stok'],
+                ]);
+            }
         }
 
         // 4. Seed Dummy Transactions for Statistics
         $admin = User::where('email', 'admin@inventiro.com')->first();
-        $allBarangs = Barang::all();
+        $allGudangs = Gudang::all();
 
-        // Create transactions for the last 6 months
-        for ($i = 0; $i < 60; $i++) {
-            $tipe = rand(0, 1) ? 'masuk' : 'keluar';
-            $tgl = Carbon::now()->subDays(rand(0, 180));
-
-            $transaksi = Transaksi::create([
-                'user_id' => $admin->id,
-                'gudang_id' => rand(0, 1) ? $gudangUtama->id : $gudangDepok->id,
-                'tipe' => $tipe,
-                'status' => 'approved',
-                'tgl_transaksi' => $tgl,
-            ]);
-
-            TransaksiDetail::create([
-                'transaksi_id' => $transaksi->id,
-                'barang_id' => $allBarangs->random()->id,
-                'jumlah' => rand(1, 20),
-            ]);
+        // Make the last 7 days intentionally uneven so the dashboard chart is easy to see.
+        $recentDailyPattern = [3, 8, 2, 9, 4, 10, 5];
+        foreach ($recentDailyPattern as $daysAgo => $totalTransactions) {
+            for ($i = 0; $i < $totalTransactions; $i++) {
+                $this->createDummyTransaction(
+                    admin: $admin,
+                    gudang: $allGudangs->random(),
+                    tanggal: Carbon::now()->subDays(6 - $daysAgo)->setTime(rand(8, 17), rand(0, 59), rand(0, 59)),
+                );
+            }
         }
+
+        // Keep a smaller batch of older data so the app still feels populated overall.
+        for ($i = 0; $i < 20; $i++) {
+            $this->createDummyTransaction(
+                admin: $admin,
+                gudang: $allGudangs->random(),
+                tanggal: Carbon::now()->subDays(rand(8, 180))->setTime(rand(8, 17), rand(0, 59), rand(0, 59)),
+            );
+        }
+    }
+
+    private function createDummyTransaction(User $admin, Gudang $gudang, Carbon $tanggal): void
+    {
+        $tipe = rand(0, 1) ? 'masuk' : 'keluar';
+
+        $transaksi = Transaksi::create([
+            'user_id' => $admin->id,
+            'gudang_id' => $gudang->id,
+            'tipe' => $tipe,
+            'status' => 'approved',
+            'tgl_transaksi' => $tanggal,
+        ]);
+
+        $barangInGudang = Barang::where('gudang_id', $gudang->id)->get();
+        if ($barangInGudang->count() === 0) {
+            return;
+        }
+
+        TransaksiDetail::create([
+            'transaksi_id' => $transaksi->id,
+            'barang_id' => $barangInGudang->random()->id,
+            'jumlah' => rand(1, 20),
+        ]);
     }
 }
