@@ -17,6 +17,11 @@ import {
     XCircle
 } from 'lucide-react';
 
+type ChartPoint = {
+    date: string;
+    count: number;
+};
+
 type DashboardTransaction = {
     id: string;
     item: string;
@@ -39,6 +44,18 @@ export default function Dashboard({ stats }: { stats: any }) {
     const [transactions, setTransactions] = useState<DashboardTransaction[]>(stats.recent_transactions ?? []);
     const [activeActionId, setActiveActionId] = useState<string | null>(null);
     const [showFilterMenu, setShowFilterMenu] = useState(false);
+    const chartData: ChartPoint[] = stats.chart_data ?? [];
+
+    const chartMetrics = useMemo(() => {
+        const maxValue = Math.max(...chartData.map((point) => point.count), 1);
+        const totalValue = chartData.reduce((sum, point) => sum + point.count, 0);
+
+        return {
+            maxValue,
+            totalValue,
+            hasData: chartData.length > 0,
+        };
+    }, [chartData]);
 
     useEffect(() => {
         const initialTransactions = stats.recent_transactions ?? [];
@@ -157,25 +174,139 @@ export default function Dashboard({ stats }: { stats: any }) {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Charts Placeholder */}
-                    <div className="lg:col-span-2 bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Statistik Transaksi (7 Hari Terakhir)</h3>
+                    <div className="lg:col-span-2 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+                        <div className="flex flex-col gap-4 border-b border-gray-100 p-6 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Statistik Transaksi (7 Hari Terakhir)</h3>
+                                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                    Total {chartMetrics.totalValue} transaksi tercatat dalam 7 hari terakhir.
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                                Transaksi Harian
+                            </div>
                         </div>
-                        <div className="h-64 flex items-end justify-between gap-2 px-2">
-                            {stats.chart_data.map((data: any, i: number) => (
-                                <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
-                                    <div
-                                        className="w-full bg-emerald-100 dark:bg-emerald-900/30 rounded-t-lg transition-all duration-300 group-hover:bg-emerald-500 relative"
-                                        style={{ height: `${(data.count / 20) * 100}%`, minHeight: '10%' }}
-                                    >
-                                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                            {data.count} Transaksi
+
+                        <div className="p-6">
+                            {chartMetrics.hasData ? (
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-3 gap-3 text-xs text-gray-500 dark:text-gray-400 sm:grid-cols-3">
+                                        <div className="rounded-xl bg-gray-50 px-3 py-2 dark:bg-gray-800/60">
+                                            Puncak
+                                            <div className="mt-1 text-sm font-bold text-gray-900 dark:text-white">{chartMetrics.maxValue} transaksi</div>
+                                        </div>
+                                        <div className="rounded-xl bg-gray-50 px-3 py-2 dark:bg-gray-800/60">
+                                            Rata-rata
+                                            <div className="mt-1 text-sm font-bold text-gray-900 dark:text-white">
+                                                {Math.round(chartMetrics.totalValue / chartData.length || 0)} transaksi
+                                            </div>
+                                        </div>
+                                        <div className="rounded-xl bg-gray-50 px-3 py-2 dark:bg-gray-800/60">
+                                            Hari aktif
+                                            <div className="mt-1 text-sm font-bold text-gray-900 dark:text-white">
+                                                {chartData.filter((point) => point.count > 0).length} hari
+                                            </div>
                                         </div>
                                     </div>
-                                    <span className="text-[10px] text-gray-400 font-medium">{data.date}</span>
+
+                                    <div className="overflow-hidden rounded-2xl bg-gradient-to-b from-emerald-50 via-white to-white p-4 dark:from-emerald-950/20 dark:via-gray-900 dark:to-gray-900">
+                                        <svg viewBox="0 0 700 260" className="h-72 w-full">
+                                            {Array.from({ length: 5 }).map((_, index) => {
+                                                const y = 40 + index * 45;
+
+                                                return (
+                                                    <g key={index}>
+                                                        <line
+                                                            x1="40"
+                                                            x2="680"
+                                                            y1={y}
+                                                            y2={y}
+                                                            stroke="currentColor"
+                                                            strokeOpacity="0.08"
+                                                            strokeWidth="1"
+                                                        />
+                                                        <text
+                                                            x="14"
+                                                            y={y + 4}
+                                                            className="fill-gray-400 text-[10px] dark:fill-gray-500"
+                                                        >
+                                                            {Math.round(chartMetrics.maxValue - (chartMetrics.maxValue / 4) * index)}
+                                                        </text>
+                                                    </g>
+                                                );
+                                            })}
+
+                                            {chartData.map((point, index) => {
+                                                const barWidth = 70;
+                                                const spacing = 20;
+                                                const x = 50 + index * (barWidth + spacing);
+                                                const usableHeight = 160;
+                                                const barHeight = Math.max((point.count / chartMetrics.maxValue) * usableHeight, 8);
+                                                const y = 210 - barHeight;
+                                                const centerX = x + barWidth / 2;
+
+                                                return (
+                                                    <g key={point.date}>
+                                                        <rect
+                                                            x={x}
+                                                            y={y}
+                                                            width={barWidth}
+                                                            height={barHeight}
+                                                            rx="16"
+                                                            fill="url(#barGradient)"
+                                                        />
+                                                        <circle cx={centerX} cy={y} r="4" fill="#10b981" />
+                                                        <text
+                                                            x={centerX}
+                                                            y={y - 10}
+                                                            textAnchor="middle"
+                                                            className="fill-gray-700 text-[11px] font-semibold dark:fill-gray-200"
+                                                        >
+                                                            {point.count}
+                                                        </text>
+                                                        <text
+                                                            x={centerX}
+                                                            y="238"
+                                                            textAnchor="middle"
+                                                            className="fill-gray-400 text-[10px] font-medium dark:fill-gray-500"
+                                                        >
+                                                            {point.date}
+                                                        </text>
+                                                        <rect
+                                                            x={x}
+                                                            y={40}
+                                                            width={barWidth}
+                                                            height={170}
+                                                            rx="16"
+                                                            fill="transparent"
+                                                        >
+                                                            <title>{`${point.date}: ${point.count} transaksi`}</title>
+                                                        </rect>
+                                                    </g>
+                                                );
+                                            })}
+
+                                            <defs>
+                                                <linearGradient id="barGradient" x1="0" x2="0" y1="0" y2="1">
+                                                    <stop offset="0%" stopColor="#34d399" />
+                                                    <stop offset="100%" stopColor="#059669" />
+                                                </linearGradient>
+                                            </defs>
+                                        </svg>
+                                    </div>
                                 </div>
-                            ))}
+                            ) : (
+                                <div className="flex min-h-[280px] flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-6 text-center dark:border-gray-800 dark:bg-gray-800/40">
+                                    <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                        <TrendingUp size={22} />
+                                    </div>
+                                    <p className="text-sm font-semibold text-gray-900 dark:text-white">Belum ada data transaksi untuk ditampilkan.</p>
+                                    <p className="mt-1 max-w-sm text-sm text-gray-500 dark:text-gray-400">
+                                        Saat transaksi masuk ke sistem, grafik ini akan otomatis terisi.
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </div>
 

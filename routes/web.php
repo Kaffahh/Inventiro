@@ -29,7 +29,7 @@ Route::get('/', function () {
 
     foreach ($dbChartData as $row) {
         if (isset($chartData[$row->date])) {
-            $chartData[$row->date] = $row->count;
+            $chartData[$row->date] = (int) $row->count;
         }
     }
 
